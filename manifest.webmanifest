@@ -1,0 +1,38 @@
+{
+  "id": "./",
+  "name": "Texas Butterflies, Moths & Their Plants",
+  "short_name": "TX Lepidoptera",
+  "description": "Explore Texas butterflies, moths, and their recorded host-plant relationships.",
+  "lang": "en-US",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#121814",
+  "theme_color": "#587640",
+  "orientation": "any",
+  "categories": [
+    "education",
+    "reference",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
