@@ -1,0 +1,24 @@
+GITHUB PAGES SETUP — FINAL PUBLIC RELEASE
+
+1. Extract Texas_Lepidoptera_FINAL_AUDITED_PWA_GITHUB_PAGES.zip on your computer.
+2. Open the GitHub repository.
+3. Upload every extracted file to the repository root.
+4. Confirm that index.html, manifest.webmanifest, service-worker.js, .nojekyll, and the icons folder are visible at the top level.
+5. Open Settings > Pages.
+6. Choose: Deploy from a branch > main > /(root), then Save.
+7. Wait for the Pages deployment in the Actions tab to finish.
+8. Open the exact URL shown in Settings > Pages.
+
+Typical project URL:
+https://YOUR-USERNAME.github.io/YOUR-REPOSITORY-NAME/
+
+Do not upload only the ZIP file. GitHub does not unzip it.
+The entry filename must remain lowercase: index.html
+
+To replace an older release, upload these files over the old files and commit the changes. A normal browser refresh may use cache briefly; use Ctrl+F5 if necessary.
+
+PWA CHECK
+- Open the deployed HTTPS Pages URL once while online.
+- Refresh once, then test the Install/Installation help and Share controls.
+- Disconnect temporarily and reload the same URL to confirm the embedded core records remain available.
+- A file:// preview cannot register the service worker; use GitHub Pages or another HTTPS server.

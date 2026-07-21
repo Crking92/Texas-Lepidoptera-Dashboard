@@ -1,0 +1,50 @@
+FINAL PUBLIC-READINESS QA REPORT
+Version: 1.0.0
+Review date: July 21, 2026
+
+DATA INTEGRITY
+- 5,273 unique Texas-linked UDELep records
+- 4,901 records in the established Texas range set, including 2 with additional visitor notation
+- 372 stray/fugitive-only Texas records
+- 85 Lepidoptera families
+- 1,832 corrected vascular-plant host genera
+- 268 records with non-plant or family-only resources
+- Corrected source record count: 13,763 nonblank records
+- Removed six non-plant taxa that had leaked into the plant-genus explorer: Protococcus, Conocephalum, Musci, Panonychus, Phyllocoptruta, and Trisetacus
+
+FUNCTIONAL QA
+- Plant-first default view
+- Common-name and scientific-name host search
+- Complete A–Z host-genus picker
+- Species filters, pagination, and 25/50/100/250/500/1,000 row options
+- My Garden persistence and deduplicated Lepidoptera list
+- Plant comparison and CSV exports
+- Other-resource filters and export
+- Light/dark mode persistence
+- Modal details, credited photos, and source fields
+- Offline core-data search after the first successful online load
+- Manifest, service-worker registration, install help, native share/clipboard fallback, and phone icons
+
+MOBILE AND ACCESSIBILITY QA
+- Mobile card views for species, My Garden, and other-resource results
+- No page-wide horizontal overflow at 390 px viewport
+- Reduced mobile hero height and large touch targets
+- Keyboard-operable tabs and result cards
+- Modal focus trap and focus return
+- Skip link, visible focus states, labeled toolbar controls, live result counts, and reduced-motion support
+- JavaScript syntax validation and duplicate-ID checks
+
+KNOWN SCIENTIFIC LIMITS — INTENTIONAL AND DISCLOSED IN THE SITE
+- Statewide range data are not local occurrence records.
+- Host relationships may have been documented outside Texas.
+- Genus-level plant relationships and native-status guidance do not establish suitability of every species in the genus.
+- The dashboard uses an August 26, 2025 UDELep snapshot; later source revisions may differ.
+- Photos and live checklist badges require internet access and depend on iNaturalist availability.
+
+PACKAGE-MERGE QA
+- Audited index.html retained as the content, data, design, accessibility, disclosure, and documentation baseline
+- Only PWA metadata, controls, modal, runtime, manifest, service worker, and icon assets were added
+- Service-worker cache key changed to txlep-pwa-v2-20260721
+- Local HTML, manifest, and service-worker asset paths validated from the archive root
+- JavaScript syntax, embedded JSON, duplicate IDs, manifest JSON, icon dimensions, mobile rendering, and control behavior validated
+- Service-worker registration, scope, cache key, and local asset paths statically validated

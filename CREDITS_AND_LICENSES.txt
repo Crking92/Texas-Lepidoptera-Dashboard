@@ -1,0 +1,24 @@
+CREDITS AND LICENSES
+
+PRIMARY DATASET
+Kimberley J. Shropshire and Douglas W. Tallamy, Department of Entomology and Wildlife Ecology, University of Delaware.
+
+Formal citation:
+Shropshire, K. J., & Tallamy, D. W. (2025). Lepidoptera of North America, north of Mexico: an annotated list containing geographic ranges and host-plant records. ZooKeys, 1261, 101–113. https://doi.org/10.3897/zookeys.1261.160796
+
+Dataset source:
+https://udspace.udel.edu/items/5eea60e9-995d-495e-bcfc-fc22e051bc55
+
+The source spreadsheet published as Supplementary Material 1 is made available under the Open Database License 1.0 (ODbL):
+https://opendatacommons.org/licenses/odbl/1-0/
+
+This package is an independent Texas-filtered visualization and derivative database. The original authors are not responsible for the filtering, parser, interface, or interpretation. The derivative CSV and database embedded in index.html retain this notice and are distributed under ODbL 1.0.
+
+JOURNAL ARTICLE
+The ZooKeys article is distributed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+
+PHOTOGRAPHS
+No iNaturalist photographs are bundled in this package. The browser requests photographs at runtime and accepts only photo records marked CC0 or CC BY. The interface displays the photographer attribution, license, and a link to the source. Copyright remains with each photographer unless waived under CC0.
+
+DASHBOARD INTERFACE
+No separate open-source software license is granted for the interface code in this package. Publishing the site does not, by itself, change ownership of the interface code. Apply the owner's or City's normal software/public-web policy before reusing the interface code for unrelated projects.
