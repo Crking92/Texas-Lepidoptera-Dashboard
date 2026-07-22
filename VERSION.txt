@@ -1,6 +1,6 @@
 Texas Butterflies, Moths & Host Plants
-Version 1.0.1
+Version 1.0.4
 Reviewed July 21, 2026
 Source snapshot: August 26, 2025
-PWA cache build: txlep-pwa-v3-20260721
-Change: moved the primary host-plant search into the opening hero and added a direct jump to matching plant results
+PWA cache build: txlep-pwa-v6-20260721
+Change: iNaturalist photos now prioritize Central Texas observations, then Texas observations, with a clearly labeled worldwide fallback when regional open-license photos are unavailable

@@ -1,58 +1,47 @@
 FINAL PUBLIC-READINESS QA REPORT
-Version: 1.0.1
+Version: 1.0.4
 Review date: July 21, 2026
 
 DATA INTEGRITY
-- 5,273 unique Texas-linked UDELep records
+- 5,273 unique Texas-linked UDELep records retained
 - 4,901 records in the established Texas range set, including 2 with additional visitor notation
 - 372 stray/fugitive-only Texas records
 - 85 Lepidoptera families
-- 1,832 corrected vascular-plant host genera
-- 268 records with non-plant or family-only resources
-- Corrected source record count: 13,763 nonblank records
-- Removed six non-plant taxa that had leaked into the plant-genus explorer: Protococcus, Conocephalum, Musci, Panonychus, Phyllocoptruta, and Trisetacus
+- 1,832 corrected vascular-plant host genera retained
+- Original texas_lepidoptera_records.csv preserved byte-for-byte from version 1.0.3
 
-FUNCTIONAL QA
-- Plant-first default view
-- Primary host-plant search displayed inside the opening hero
-- Search submission switches to the host view and scrolls to matching plant results
-- Common-name and scientific-name host search
-- Complete A–Z host-genus picker
-- Species filters, pagination, and 25/50/100/250/500/1,000 row options
-- My Garden persistence and deduplicated Lepidoptera list
-- Plant comparison and CSV exports
-- Other-resource filters and export
-- Light/dark mode persistence
-- Modal details, credited photos, and source fields
-- Offline core-data search after the first successful online load
-- Manifest, service-worker registration, install help, native share/clipboard fallback, and phone icons
+REGIONAL iNATURALIST PHOTO REVISION
+- Automatic photo search now uses three ordered stages:
+  1. Central Texas priority bounding box: 29.30 to 31.05 latitude and -98.90 to -97.00 longitude
+  2. The iNaturalist Texas place
+  3. A clearly labeled outside-Texas worldwide fallback only when regional open-license photos are unavailable
+- Applies to insect thumbnails, insect detail photos, plant cards, featured plants, My Garden, comparison cards, and plant spotlights
+- Thumbnail badges identify CTX, TX, or Global source scope
+- Full photo credits identify Central Texas observation, Texas observation, or Outside Texas fallback
+- Only research-grade observations with CC0 or CC BY photo records are accepted by the automatic loader
+- Photo and license links continue to point to the corresponding iNaturalist photo record
+- The Central Texas box is disclosed as a practical search region, not an official ecological or political boundary
+- No visitor geolocation is requested; only fixed regional filters and the selected taxon name are sent to iNaturalist
 
-MOBILE AND ACCESSIBILITY QA
-- Mobile card views for species, My Garden, and other-resource results
-- No page-wide horizontal overflow at 390 px viewport
-- Reduced mobile hero height and large touch targets
-- Keyboard-operable tabs and result cards
-- Modal focus trap and focus return
-- Skip link, visible focus states, labeled toolbar controls, live result counts, and reduced-motion support
-- JavaScript syntax validation and duplicate-ID checks
+FUNCTIONAL AND CODE QA
+- Staged regional-photo logic tested with mocked API responses
+- Confirmed Central Texas results rank before Texas results
+- Confirmed Texas results rank before worldwide fallback results
+- Confirmed worldwide requests are skipped when regional results fill the requested photo count
+- Confirmed CC BY-NC and other non-approved licenses are excluded
+- JavaScript syntax validated for both executable inline scripts
+- Embedded dashboard JSON parsed successfully
+- Duplicate HTML IDs checked
+- Local HTML, manifest, icon, and service-worker asset paths checked
+- Manifest JSON and icon dimensions checked
+- Service-worker cache key updated to txlep-pwa-v6-20260721
+- index.html and .nojekyll remain at the archive root
 
-KNOWN SCIENTIFIC LIMITS — INTENTIONAL AND DISCLOSED IN THE SITE
-- Statewide range data are not local occurrence records.
-- Host relationships may have been documented outside Texas.
-- Genus-level plant relationships and native-status guidance do not establish suitability of every species in the genus.
-- The dashboard uses an August 26, 2025 UDELep snapshot; later source revisions may differ.
-- Photos and live checklist badges require internet access and depend on iNaturalist availability.
+ACCESSIBILITY AND INTERPRETATION
+- Region information is included in thumbnail accessible labels and full photo credits
+- Existing keyboard navigation, modal focus handling, smart plant search, responsive cards, disclosures, and offline core-data behavior retained
+- Regional photos illustrate appearance only; they do not prove that every photographed taxon or host relationship occurs at a specific property
 
-PACKAGE-MERGE QA
-- Audited index.html retained as the content, data, design, accessibility, disclosure, and documentation baseline
-- Only PWA metadata, controls, modal, runtime, manifest, service worker, and icon assets were added
-- Service-worker cache key changed to txlep-pwa-v3-20260721
-- Local HTML, manifest, and service-worker asset paths validated from the archive root
-- JavaScript syntax, embedded JSON, duplicate IDs, manifest JSON, icon dimensions, and local asset paths validated
-- Service-worker registration, scope, cache key, and local asset paths statically validated
-
-LAYOUT REVISION QA
-- Host search moved from the lower results toolbar to the opening hero
-- Common/scientific name search behavior retained
-- Secondary sort, surprise, and clear-search controls retained above the plant grid
-- Service-worker cache key bumped to txlep-pwa-v3-20260721 to prevent stale layouts
+RUNTIME DEPENDENCY
+- Live photos and checklist badges require internet access and depend on current iNaturalist API availability
+- The embedded dashboard records, search, saved garden, and comparison tools remain available offline after the app shell is cached

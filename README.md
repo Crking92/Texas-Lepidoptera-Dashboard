@@ -4,16 +4,16 @@ A beginner-friendly, plant-first dashboard for exploring UDELep host relationshi
 
 ## Public release
 
-- Dashboard version: **1.0.1**
+- Dashboard version: **1.0.4**
 - Final review: **July 21, 2026**
 - UDELep source snapshot used: **August 26, 2025**
 - Scope: **statewide Texas range fields**, not county-, city-, ZIP-, park-, or property-level occurrence data
 
 ## Main features
 
-- Prominent opening host-plant search with a direct jump to matching results
+- Prominent opening host-plant search with accessible autocomplete, common/scientific-name matching, alternate-name aliases, and typo tolerance, followed by compact navigation and the matching plant-results panel
 - Plant-first exploration with featured Texas-native plant groups
-- Reusable CC0/CC BY iNaturalist thumbnails and credited detail photos
+- Reusable CC0/CC BY iNaturalist thumbnails and credited detail photos, prioritized from Central Texas and then Texas
 - Beginner view with optional scientific filters and full source wording
 - My Garden with locally saved plants and a deduplicated insect list
 - Plant comparison tools
@@ -35,7 +35,7 @@ The source is a dated snapshot. University of Delaware may publish later UDELep 
 
 ## Privacy and external services
 
-My Garden, comparison choices, theme, and display settings are stored only in the visitor's browser. The service worker stores the app shell and embedded core records in the browser cache for offline use. There is no account system, analytics tracker, or location request. When photos or live checklist badges load, the browser contacts iNaturalist for the displayed taxon name.
+My Garden, comparison choices, theme, and display settings are stored only in the visitor's browser. The service worker stores the app shell and embedded core records in the browser cache for offline use. There is no account system, analytics tracker, or location request. When photos or live checklist badges load, the browser contacts iNaturalist for the displayed taxon name and fixed regional filters. The page never requests the visitor's location. Photo searches prioritize a Central Texas bounding box, then Texas, and use a labeled worldwide fallback only when regional open-license results are unavailable.
 
 ## Credits and licensing
 

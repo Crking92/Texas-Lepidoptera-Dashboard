@@ -20,5 +20,7 @@ The ZooKeys article is distributed under Creative Commons Attribution 4.0 Intern
 PHOTOGRAPHS
 No iNaturalist photographs are bundled in this package. The browser requests photographs at runtime and accepts only photo records marked CC0 or CC BY. The interface displays the photographer attribution, license, and a link to the source. Copyright remains with each photographer unless waived under CC0.
 
+Regional photo selection: the runtime loader first requests observations inside a fixed Central Texas priority bounding box, then observations within the iNaturalist Texas place, and finally a clearly labeled worldwide fallback if needed. The bounding box is a practical search area and is not presented as an official regional boundary.
+
 DASHBOARD INTERFACE
 No separate open-source software license is granted for the interface code in this package. Publishing the site does not, by itself, change ownership of the interface code. Apply the owner's or City's normal software/public-web policy before reusing the interface code for unrelated projects.
