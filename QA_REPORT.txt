@@ -1,5 +1,5 @@
 FINAL PUBLIC-READINESS QA REPORT
-Version: 1.0.4
+Version: 1.0.5
 Review date: July 21, 2026
 
 DATA INTEGRITY
@@ -8,7 +8,7 @@ DATA INTEGRITY
 - 372 stray/fugitive-only Texas records
 - 85 Lepidoptera families
 - 1,832 corrected vascular-plant host genera retained
-- Original texas_lepidoptera_records.csv preserved byte-for-byte from version 1.0.3
+- Original texas_lepidoptera_records.csv preserved byte-for-byte from version 1.0.4
 
 REGIONAL iNATURALIST PHOTO REVISION
 - Automatic photo search now uses three ordered stages:
@@ -23,6 +23,13 @@ REGIONAL iNATURALIST PHOTO REVISION
 - The Central Texas box is disclosed as a practical search region, not an official ecological or political boundary
 - No visitor geolocation is requested; only fixed regional filters and the selected taxon name are sent to iNaturalist
 
+NAVIGATION LAYOUT REVISION
+- Removed horizontal overflow and side-scrolling from the dashboard view tabs
+- View tabs now wrap naturally onto additional lines when needed
+- Download, theme, install, and share controls remain in the same unified navigation panel
+- At narrower widths, app tools move below the wrapped view tabs without creating page-level horizontal overflow
+- Tab semantics, keyboard behavior, focus styles, and active-tab state remain unchanged
+
 FUNCTIONAL AND CODE QA
 - Staged regional-photo logic tested with mocked API responses
 - Confirmed Central Texas results rank before Texas results
@@ -34,7 +41,7 @@ FUNCTIONAL AND CODE QA
 - Duplicate HTML IDs checked
 - Local HTML, manifest, icon, and service-worker asset paths checked
 - Manifest JSON and icon dimensions checked
-- Service-worker cache key updated to txlep-pwa-v6-20260721
+- Service-worker cache key updated to txlep-pwa-v7-20260721
 - index.html and .nojekyll remain at the archive root
 
 ACCESSIBILITY AND INTERPRETATION
