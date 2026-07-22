@@ -1,6 +1,6 @@
 FINAL PUBLIC-READINESS QA REPORT
-Version: 1.0.5
-Review date: July 21, 2026
+Version: 1.0.6
+Review date: July 22, 2026
 
 DATA INTEGRITY
 - 5,273 unique Texas-linked UDELep records retained
@@ -30,6 +30,13 @@ NAVIGATION LAYOUT REVISION
 - At narrower widths, app tools move below the wrapped view tabs without creating page-level horizontal overflow
 - Tab semantics, keyboard behavior, focus styles, and active-tab state remain unchanged
 
+IOS HOME-SCREEN REVISION
+- apple-mobile-web-app-capable is set to yes
+- apple-mobile-web-app-status-bar-style is set to black-translucent
+- apple-mobile-web-app-title is set to lepidoptera
+- apple-touch-icon uses ./icons/apple-touch-icon.png
+- viewport-fit=cover is enabled for edge-to-edge iOS display
+
 FUNCTIONAL AND CODE QA
 - Staged regional-photo logic tested with mocked API responses
 - Confirmed Central Texas results rank before Texas results
@@ -41,7 +48,7 @@ FUNCTIONAL AND CODE QA
 - Duplicate HTML IDs checked
 - Local HTML, manifest, icon, and service-worker asset paths checked
 - Manifest JSON and icon dimensions checked
-- Service-worker cache key updated to txlep-pwa-v7-20260721
+- Service-worker cache key updated to txlep-pwa-v8-20260722
 - index.html and .nojekyll remain at the archive root
 
 ACCESSIBILITY AND INTERPRETATION

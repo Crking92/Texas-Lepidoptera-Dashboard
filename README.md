@@ -4,8 +4,8 @@ A beginner-friendly, plant-first dashboard for exploring UDELep host relationshi
 
 ## Public release
 
-- Dashboard version: **1.0.5**
-- Final review: **July 21, 2026**
+- Dashboard version: **1.0.6**
+- Final review: **July 22, 2026**
 - UDELep source snapshot used: **August 26, 2025**
 - Scope: **statewide Texas range fields**, not county-, city-, ZIP-, park-, or property-level occurrence data
 
@@ -20,6 +20,7 @@ A beginner-friendly, plant-first dashboard for exploring UDELep host relationshi
 - Separate exploration of fungi, algae, lichens, detritus, bryophytes, and animal resources
 - Responsive mobile cards, light/dark mode, CSV exports, keyboard navigation, and print support
 - Installable PWA controls, native sharing where supported, and offline access to the embedded core records
+- iOS home-screen standalone mode with black-translucent status bar metadata and the repository Apple touch icon
 
 ## GitHub Pages deployment
 

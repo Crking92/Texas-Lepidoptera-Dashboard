@@ -1,6 +1,6 @@
 Texas Butterflies, Moths & Host Plants
-Version 1.0.5
-Reviewed July 21, 2026
+Version 1.0.6
+Reviewed July 22, 2026
 Source snapshot: August 26, 2025
-PWA cache build: txlep-pwa-v7-20260721
-Change: dashboard view tabs and app tools now share one wrapping navigation panel with no horizontal side scroller
+PWA cache build: txlep-pwa-v8-20260722
+Change: added iOS standalone/fullscreen home-screen metadata, black-translucent status bar, app title, and existing Apple touch icon path

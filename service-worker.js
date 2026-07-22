@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'txlep-pwa-v7-20260721';
+const CACHE_VERSION = 'txlep-pwa-v8-20260722';
 const CORE_ASSETS = [
   './',
   './index.html',
