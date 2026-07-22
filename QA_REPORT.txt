@@ -1,5 +1,5 @@
 FINAL PUBLIC-READINESS QA REPORT
-Version: 1.0.0
+Version: 1.0.1
 Review date: July 21, 2026
 
 DATA INTEGRITY
@@ -14,6 +14,8 @@ DATA INTEGRITY
 
 FUNCTIONAL QA
 - Plant-first default view
+- Primary host-plant search displayed inside the opening hero
+- Search submission switches to the host view and scrolls to matching plant results
 - Common-name and scientific-name host search
 - Complete A–Z host-genus picker
 - Species filters, pagination, and 25/50/100/250/500/1,000 row options
@@ -44,7 +46,13 @@ KNOWN SCIENTIFIC LIMITS — INTENTIONAL AND DISCLOSED IN THE SITE
 PACKAGE-MERGE QA
 - Audited index.html retained as the content, data, design, accessibility, disclosure, and documentation baseline
 - Only PWA metadata, controls, modal, runtime, manifest, service worker, and icon assets were added
-- Service-worker cache key changed to txlep-pwa-v2-20260721
+- Service-worker cache key changed to txlep-pwa-v3-20260721
 - Local HTML, manifest, and service-worker asset paths validated from the archive root
-- JavaScript syntax, embedded JSON, duplicate IDs, manifest JSON, icon dimensions, mobile rendering, and control behavior validated
+- JavaScript syntax, embedded JSON, duplicate IDs, manifest JSON, icon dimensions, and local asset paths validated
 - Service-worker registration, scope, cache key, and local asset paths statically validated
+
+LAYOUT REVISION QA
+- Host search moved from the lower results toolbar to the opening hero
+- Common/scientific name search behavior retained
+- Secondary sort, surprise, and clear-search controls retained above the plant grid
+- Service-worker cache key bumped to txlep-pwa-v3-20260721 to prevent stale layouts

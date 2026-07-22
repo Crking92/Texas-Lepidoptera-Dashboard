@@ -1,6 +1,6 @@
 Texas Butterflies, Moths & Host Plants
-Version 1.0.0
+Version 1.0.1
 Reviewed July 21, 2026
 Source snapshot: August 26, 2025
-PWA cache build: txlep-pwa-v2-20260721
-Change: audited 1.0.0 release plus install/share/offline PWA packaging
+PWA cache build: txlep-pwa-v3-20260721
+Change: moved the primary host-plant search into the opening hero and added a direct jump to matching plant results

@@ -4,14 +4,15 @@ A beginner-friendly, plant-first dashboard for exploring UDELep host relationshi
 
 ## Public release
 
-- Dashboard version: **1.0.0**
+- Dashboard version: **1.0.1**
 - Final review: **July 21, 2026**
 - UDELep source snapshot used: **August 26, 2025**
 - Scope: **statewide Texas range fields**, not county-, city-, ZIP-, park-, or property-level occurrence data
 
 ## Main features
 
-- Plant-first search with featured Texas-native plant groups
+- Prominent opening host-plant search with a direct jump to matching results
+- Plant-first exploration with featured Texas-native plant groups
 - Reusable CC0/CC BY iNaturalist thumbnails and credited detail photos
 - Beginner view with optional scientific filters and full source wording
 - My Garden with locally saved plants and a deduplicated insect list
