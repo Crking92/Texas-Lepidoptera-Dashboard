@@ -1,11 +1,10 @@
-const CACHE_VERSION = 'txlep-pwa-v9-20260724-county';
+const CACHE_VERSION = 'txlep-pwa-v11-20260724-county-fix';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './county-filter.js',
-  './assets/glass-root-garden-logo.jpg',
   './manifest.webmanifest',
   './favicon.svg',
+  './assets/glass-root-garden-logo.jpg',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
@@ -24,7 +23,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE_VERSION).map(key => caches.delete(key))))
+      .then(keys => Promise.all(keys.filter(key => key.startsWith('txlep-pwa-') && key !== CACHE_VERSION).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
