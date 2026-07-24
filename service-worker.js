@@ -1,7 +1,9 @@
-const CACHE_VERSION = 'txlep-pwa-v8-20260722';
+const CACHE_VERSION = 'txlep-pwa-v9-20260724-county';
 const CORE_ASSETS = [
   './',
   './index.html',
+  './county-filter.js',
+  './assets/glass-root-garden-logo.jpg',
   './manifest.webmanifest',
   './favicon.svg',
   './icons/icon-192.png',

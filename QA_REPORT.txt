@@ -59,3 +59,13 @@ ACCESSIBILITY AND INTERPRETATION
 RUNTIME DEPENDENCY
 - Live photos and checklist badges require internet access and depend on current iNaturalist API availability
 - The embedded dashboard records, search, saved garden, and comparison tools remain available offline after the app shell is cached
+
+COUNTY FILTER / BRANDING QA — July 24, 2026
+- Embedded source records preserved: 5,273 records and 1,832 host genera.
+- Embedded release metadata updated to version 1.1.0; host and range records were not regenerated.
+- Searchable county list contains exactly 254 unique Texas county names.
+- HTML check found no duplicate element IDs.
+- county-filter.js, main dashboard script, and PWA helper script pass Node syntax checks.
+- Mocked behavior test passed: recorded-only mode filtered the species list, host counts changed with county evidence, context mode retained statewide results, and clearing restored statewide counts.
+- Service-worker core asset list includes county-filter.js and the Glass Root Garden logo.
+- Live iNaturalist calls require network access in the deployed browser; the build uses the supported observation species-count endpoint with place, Lepidoptera, research-grade, verifiable, and species-rank filters.
