@@ -1,7 +1,0 @@
-Texas Butterflies, Moths & Host Plants
-Version 1.1.1
-Reviewed July 24, 2026
-Source snapshot: August 26, 2025
-PWA cache build: txlep-pwa-v11-20260724-county-fix
-
-Change: fixed Texas county place lookup by querying iNaturalist with the county's actual place name and validating county/Texas metadata, with a verified Hays County place-ID fallback. Removed the prior county-priority grouping so all 254 counties are presented alphabetically. County selection now forces every plant spotlight, host count, suggestion count, My Garden total, comparison, and recommendation to recalculate from county-matched taxa.
