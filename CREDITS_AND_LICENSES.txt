@@ -24,3 +24,10 @@ Regional photo selection: the runtime loader first requests observations inside 
 
 DASHBOARD INTERFACE
 No separate open-source software license is granted for the interface code in this package. Publishing the site does not, by itself, change ownership of the interface code. Apply the owner's or City's normal software/public-web policy before reusing the interface code for unrelated projects.
+
+
+COUNTY OCCURRENCE FILTER
+
+County relevance uses the public iNaturalist API to retrieve Research Grade Lepidoptera species counts for a selected standard Texas county place. Scientific names and dashboard-listed synonyms are crosswalked to the embedded UDELep-derived records. Observation counts and links remain attributed to iNaturalist and the contributing observers/data providers.
+
+A county observation documents occurrence at least once in the selected place. It does not by itself establish residency, breeding, abundance, current presence, or local use of a plant listed as a host elsewhere. A missing automated match is not evidence of absence. Review the linked observations and original host references before making strong local claims.

@@ -1,0 +1,16 @@
+TEXAS LEPIDOPTERA DASHBOARD — VERSION 1.1.2
+
+WHAT CHANGED
+- The county controls now sit directly below the main plant search instead of being a large opening feature.
+- UDELep Texas-range host counts remain the main plant totals.
+- A selected county adds a separate research-grade iNaturalist-observed subset.
+- The default county display keeps all UDELep relationships visible and labels county observations.
+- A strict county-observed-only insect-list option remains available.
+- Previous county-mode browser settings are intentionally migrated to a new setting key so this release opens in the new combined default view.
+- The special 24-county grouping remains removed; all 254 Texas counties are alphabetical.
+
+EXPECTED EXAMPLE
+Quercus should continue to show 545 UDELep Texas-range taxa in this data snapshot. After Hays County loads, it should also show a smaller “Observed in Hays County” number rather than replacing 545.
+
+DEPLOYMENT
+Extract this ZIP and replace the existing repository files with all files and folders from the package. Wait for GitHub Pages to finish deploying, then reload twice. An installed Home Screen app may need to be fully closed and reopened once because this release uses a new service-worker cache version.

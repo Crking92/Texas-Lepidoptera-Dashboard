@@ -1,6 +1,7 @@
 Texas Butterflies, Moths & Host Plants
-Version 1.0.6
-Reviewed July 22, 2026
+Version 1.1.2
+Reviewed July 24, 2026
 Source snapshot: August 26, 2025
-PWA cache build: txlep-pwa-v8-20260722
-Change: added iOS standalone/fullscreen home-screen metadata, black-translucent status bar, app title, and existing Apple touch icon path
+PWA cache build: txlep-pwa-v112-20260724-dual-counts
+
+Change: moved the optional county controls directly below the plant search and changed the county layer from a replacement total to a separate iNaturalist-observed subset. UDELep Texas-range host totals remain the primary numbers throughout the dashboard. Strict county-only insect filtering remains available as an optional display mode.
