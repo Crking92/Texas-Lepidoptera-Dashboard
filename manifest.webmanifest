@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Texas Butterflies, Moths & Host Plants",
   "short_name": "TX Lepidoptera",
-  "description": "Explore statewide UDELep caterpillar host relationships with an optional, separately displayed county observation subset from iNaturalist.",
+  "description": "A beginner-friendly statewide guide to Texas butterflies, moths, and their recorded caterpillar host plants.",
   "lang": "en-US",
   "start_url": "./",
   "scope": "./",

@@ -1,7 +1,6 @@
 Texas Butterflies, Moths & Host Plants
-Version 1.1.2
-Reviewed July 24, 2026
+Version 1.3.0
+Reviewed August 21, 2026
 Source snapshot: August 26, 2025
-PWA cache build: txlep-pwa-v112-20260724-dual-counts
-
-Change: moved the optional county controls directly below the plant search and changed the county layer from a replacement total to a separate iNaturalist-observed subset. UDELep Texas-range host totals remain the primary numbers throughout the dashboard. Strict county-only insect filtering remains available as an optional display mode.
+PWA cache build: txlep-pwa-v15-20260821
+Change: rebuilt Check your area as a plant-first host-potential scan plus a separate iNaturalist Lepidoptera occurrence layer; added deduplicated scanned-plant and host-genus audit views
