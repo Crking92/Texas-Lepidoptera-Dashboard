@@ -134,19 +134,38 @@ function initCountyDiscovery(){
     return result.json();
   };
   async function resolveCounty(name,signal){
-    if(name==='Hays')return 326; // iNaturalist's established Hays County, TX place
-    const places=await apiGet('places/autocomplete?q='+encodeURIComponent(name+' County'),signal);
-    const list=(places.results||[]).filter(p=>String(p.name||'').toLowerCase().trim()===(name+' County').toLowerCase());
+    if(name==='Hays')return 326; // Verified iNaturalist place: Hays County, US, TX
+    const expected=(name+' County').toLowerCase();
+    const isName=p=>{
+      const raw=String(p.name||p.display_name||'').trim().toLowerCase();
+      return raw===expected||raw.startsWith(expected+',')||raw.startsWith(expected+' ');
+    };
     const texas=p=>/texas|(?:^|,\s*)tx(?:$|,)/i.test([p.display_name,p.name].filter(Boolean).join(' '))||
-      (Array.isArray(p.ancestor_place_ids)&&p.ancestor_place_ids.includes(18));
-    let match=list.find(texas);
-    // For duplicate names, do not silently pick a county in another state.
-    if(!match)for(const candidate of list){
+      String(p.ancestry||'').split('/').includes('18')||
+      p.parent_id===18||
+      (Array.isArray(p.ancestor_place_ids)&&p.ancestor_place_ids.includes(18))||
+      (Array.isArray(p.ancestors)&&p.ancestors.some(a=>a.id===18||a.name==='Texas'));
+    // Autocomplete can return e.g. "Travis County, US, TX" in the name,
+    // so exact equality alone incorrectly rejects genuine county places.
+    const lookup=await apiGet('places/autocomplete?q='+encodeURIComponent(name+' County'),signal);
+    const candidates=(lookup.results||[]).filter(isName);
+    let match=candidates.find(texas);
+    if(!match)for(const candidate of candidates){
       const detail=await apiGet('places/'+candidate.id,signal);
       const place=detail.results?.[0];
-      if(place&&(texas(place)||(place.ancestors||[]).some(a=>a.id===18||a.name==='Texas'))){match=candidate;break}
+      if(place&&texas(place)){match=candidate;break}
     }
-    if(!match)throw Error('Texas county boundary not found');
+    // If autocomplete did not find it, query counties already constrained to
+    // the Texas ancestor; no ambiguous out-of-state match can slip through.
+    if(!match){
+      for(let page=1;page<=3;page++){
+        const data=await apiGet('places?ancestor_id=18&place_type=County&per_page=200&page='+page,signal);
+        match=(data.results||[]).find(isName);
+        if(match)break;
+        if((data.results||[]).length<200)break;
+      }
+    }
+    if(!match)throw Error('Texas county place was not resolved by iNaturalist');
     return match.id;
   }
   function cached(name){
