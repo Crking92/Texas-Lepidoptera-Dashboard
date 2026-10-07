@@ -23,9 +23,37 @@ function renderCompareBeeConnections(names){
 }
 function syncBeeTheme(){const frame=document.getElementById('beeExplorer');if(frame.contentDocument?.body)frame.contentDocument.body.classList.toggle('dark',document.documentElement.dataset.theme==='dark')}
 function initNatureIntegration(){
+initCountyDiscovery();
 const beeFrame=document.getElementById('beeExplorer');beeFrame.addEventListener('load',syncBeeTheme);
 document.getElementById('themeToggle').addEventListener('click',syncBeeTheme);
 window.addEventListener('storage',event=>{if(event.key==='txlep-garden'){gardenPlants.clear();readStoredArray('txlep-garden').forEach(g=>gardenPlants.add(g));renderGarden();renderComparison()}});
 renderGardenBeeConnections();renderCompareBeeConnections(comparePlants.filter(Boolean));
 
+}
+
+
+/* County-first discovery: use the existing iNaturalist named-place scanner. */
+function initCountyDiscovery(){
+  const search=document.getElementById('localPlaceSearch'),find=document.getElementById('localFindPlace');
+  if(!search||!find||document.getElementById('countyQuickSelect'))return;
+  const section=search.closest('.local-scan-section');
+  if(!section)return;
+  const chooser=document.createElement('div');chooser.className='county-discovery';
+  const label=document.createElement('label');label.htmlFor='countyQuickSelect';label.textContent='Start with a Central Texas county';
+  const select=document.createElement('select');select.id='countyQuickSelect';select.className='control';
+  const counties=['Hays','Travis','Comal','Blanco','Caldwell','Guadalupe','Bexar','Kendall','Burnet','Gillespie','Llano','Kerr','Bandera','Medina','San Saba','Mason','Kimble','Sutton','Edwards','Real','Uvalde','McCulloch','Concho','Tom Green','Menard','Schleicher'];
+  [['','Choose a county…'],...counties.map(name=>[name,name+' County'])].forEach(([value,text])=>{const option=document.createElement('option');option.value=value;option.textContent=text;select.append(option)});
+  const note=document.createElement('p');note.className='microcopy';note.textContent='Choose a county, then select its Texas boundary from the iNaturalist matches below. The scan uses that county boundary, not a statewide guess. To check another county, repeat the scan separately.';
+  chooser.append(label,select,note);
+  const first=section.querySelector('h3');first.after(chooser);
+  select.addEventListener('change',()=>{if(!select.value)return;search.value=select.value+' County, Texas';find.click();const results=document.getElementById('localPlaceResults');if(results)setTimeout(()=>results.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'}),650)});
+  const results=document.getElementById('localPlaceResults');
+  if(results)results.addEventListener('click',event=>{if(event.target.closest('.local-place-option')){document.getElementById('localLocationStatus')?.scrollIntoView({behavior:'smooth',block:'center'})}});
+  const scan=document.getElementById('localRunScan');
+  if(scan)scan.addEventListener('click',()=>setTimeout(()=>document.getElementById('localScanStatus')?.scrollIntoView({behavior:'smooth',block:'start'}),80));
+  const tabButtons=document.querySelectorAll('[data-tab]');
+  tabButtons.forEach(button=>button.addEventListener('click',()=>{
+    const target=document.getElementById('view-'+button.dataset.tab);
+    if(target)setTimeout(()=>{if(target.classList.contains('active'))target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})},40);
+  }));
 }
