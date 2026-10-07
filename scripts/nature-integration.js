@@ -43,7 +43,7 @@ function initCountyDiscovery(){
   const select=document.createElement('select');select.id='countyQuickSelect';select.className='control';
   const counties=['Hays','Travis','Comal','Blanco','Caldwell','Guadalupe','Bexar','Kendall','Burnet','Gillespie','Llano','Kerr','Bandera','Medina','San Saba','Mason','Kimble','Sutton','Edwards','Real','Uvalde','McCulloch','Concho','Tom Green','Menard','Schleicher'];
   [['','Choose a county…'],...counties.map(name=>[name,name+' County'])].forEach(([value,text])=>{const option=document.createElement('option');option.value=value;option.textContent=text;select.append(option)});
-  const note=document.createElement('p');note.className='microcopy';note.textContent='Choose a county, then select its Texas boundary from the iNaturalist matches below. The scan uses that county boundary, not a statewide guess. To check another county, repeat the scan separately.';
+  const note=document.createElement('p');note.className='microcopy';note.textContent='Explore the plants and insects recorded around you. Choose a county, then tap the matching Texas county in the results. We’ll use its real boundary for the iNaturalist check—not a statewide estimate. Want to explore a neighboring county? Choose it next.';
   chooser.append(label,select,note);
   const first=section.querySelector('h3');first.after(chooser);
   select.addEventListener('change',()=>{
