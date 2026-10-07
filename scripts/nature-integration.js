@@ -39,16 +39,20 @@ function initCountyDiscovery(){
   const section=search.closest('.local-scan-section');
   if(!section)return;
   const chooser=document.createElement('div');chooser.className='county-discovery';
-  const label=document.createElement('label');label.htmlFor='countyQuickSelect';label.textContent='Start with a Central Texas county';
+  const label=document.createElement('label');label.htmlFor='countyQuickSelect';label.textContent='Or explore plants and insects near you';
   const select=document.createElement('select');select.id='countyQuickSelect';select.className='control';
   const counties=['Hays','Travis','Comal','Blanco','Caldwell','Guadalupe','Bexar','Kendall','Burnet','Gillespie','Llano','Kerr','Bandera','Medina','San Saba','Mason','Kimble','Sutton','Edwards','Real','Uvalde','McCulloch','Concho','Tom Green','Menard','Schleicher'];
   [['','Choose a county…'],...counties.map(name=>[name,name+' County'])].forEach(([value,text])=>{const option=document.createElement('option');option.value=value;option.textContent=text;select.append(option)});
   const note=document.createElement('p');note.className='microcopy';note.textContent='Explore the plants and insects recorded around you. Choose a county, then tap the matching Texas county in the results. We’ll use its real boundary for the iNaturalist check—not a statewide estimate. Want to explore a neighboring county? Choose it next.';
   chooser.append(label,select,note);
-  const first=section.querySelector('h3');first.after(chooser);
+  const heroSearch=document.querySelector('.hero-search')||document.getElementById('heroHostSearchForm');
+  if(heroSearch)heroSearch.insertAdjacentElement('afterend',chooser);
+  else {const first=section.querySelector('h3');if(first)first.after(chooser);else section.prepend(chooser)}
   select.addEventListener('change',()=>{
     if(!select.value)return;
     search.value=select.value+' County, Texas';
+    // Reveal the existing county-boundary picker before running its real lookup.
+    if(typeof switchTab==='function')switchTab('local');
     const results=document.getElementById('localPlaceResults');
     const motion=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
     // The lookup is asynchronous. Move when choices actually arrive, not after an arbitrary delay.
