@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'txlep-pwa-nature-v9-20261007';
+const CACHE_VERSION = 'txlep-pwa-nature-v10-20261007';
 const CORE_ASSETS = [
   './index.html',
   './scripts/nature-garden.css',
@@ -63,7 +63,11 @@ self.addEventListener('fetch', event => {
         }
         throw new Error('HTTP '+(fresh && fresh.status));
       } catch (_) {
-        const saved = await cache.match(request) ||
+        // An embedded bee iframe uses ?embedded=1. Cache matching needs
+        // to ignore that query when the network is unavailable.
+        const isBeePage = url.pathname.endsWith('/bees/index.html') || url.pathname.endsWith('/bees/');
+        const saved = await cache.match(request, {ignoreSearch: true}) ||
+          (isBeePage && await cache.match('./bees/index.html')) ||
           (request.mode === 'navigate' && await cache.match('./index.html'));
         if (saved) return saved;
         return Response.error();
