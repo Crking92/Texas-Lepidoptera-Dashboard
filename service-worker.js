@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'txlep-pwa-nature-v7-20261007';
+const CACHE_VERSION = 'txlep-pwa-nature-v8-20261007';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -35,35 +35,47 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Prefer fresh HTML, JS and CSS so installed iPhone dashboards cannot remain
+// trapped on a previous county lookup just because the older asset was cached.
+// Offline fallback still uses the last good copy.
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
-
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_VERSION).then(cache => cache.put(request, copy));
-          return response;
-        })
-        .catch(async () => (await caches.match(request)) || (await caches.match('./index.html')))
-    );
+  const liveCode = request.mode === 'navigate' ||
+    /\\.(?:js|css|html)$/i.test(url.pathname) ||
+    url.pathname === self.registration.scope.replace(self.location.origin, '');
+
+  if (liveCode) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE_VERSION);
+      try {
+        const fresh = await fetch(request, {cache: 'no-cache'});
+        if (fresh && fresh.ok) {
+          await cache.put(request, fresh.clone()).catch(() => {});
+          return fresh;
+        }
+        throw new Error('HTTP '+(fresh && fresh.status));
+      } catch (_) {
+        const saved = await cache.match(request) ||
+          (request.mode === 'navigate' && await cache.match('./index.html'));
+        if (saved) return saved;
+        return Response.error();
+      }
+    })());
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then(cached => {
-      if (cached) return cached;
-      return fetch(request).then(response => {
-        if (!response || response.status !== 200 || response.type !== 'basic') return response;
-        const copy = response.clone();
-        caches.open(CACHE_VERSION).then(cache => cache.put(request, copy));
-        return response;
-      });
-    })
-  );
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_VERSION);
+    const stored = await cache.match(request);
+    if (stored) return stored;
+    const response = await fetch(request);
+    if (response && response.ok && response.type === 'basic') {
+      cache.put(request, response.clone()).catch(() => {});
+    }
+    return response;
+  })());
 });
