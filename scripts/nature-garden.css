@@ -63,3 +63,17 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
 /* Quick regional context is not the polygon mapping tool. */
 .hero>.county-discovery .county-quick-summary{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--soft);color:var(--ink);font-size:.81rem;line-height:1.55}
 .hero>.county-discovery p{max-width:65ch}
+
+/* County totals are a second number on each plant, never a map overlay. */
+.host-count-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px;align-items:start}
+.host-count-pair .host-count{margin-top:0;line-height:1.15}
+.host-texas-metric,.host-county-metric{min-width:0}
+.host-county-metric{border-left:1px solid var(--line);padding-left:12px}
+.host-county-metric strong{display:block;font-family:Georgia,serif;font-weight:normal;font-size:1.7rem;color:var(--accent);line-height:1.15}
+.host-county-metric span{display:block;font-size:.72rem;color:var(--muted);line-height:1.45;margin-top:5px}
+.county-added-metric strong{display:block;font-family:Georgia,serif;font-weight:normal;font-size:1.25rem;color:var(--accent)}
+.county-added-metric span{display:block;font-size:.73rem;color:var(--muted)}
+.county-compare-metric{background:var(--soft);border-radius:13px;padding:10px 12px;margin:8px 0}
+.hero>.county-discovery{padding:12px 15px}
+.hero>.county-discovery .county-quick-summary{background:transparent;border-top:1px solid var(--line);border-radius:0;padding:9px 0 0;font-size:.77rem;color:var(--muted)}
+@media(max-width:600px){.host-count-pair{gap:9px}.host-county-metric{padding-left:9px}.host-county-metric strong{font-size:1.6rem}.host-county-metric span{font-size:.7rem}}
