@@ -2,3 +2,44 @@
 .guide-card,.citation-block,.license-box{overflow-wrap:anywhere;min-width:0}.credit-grid>*{min-width:0}.guide-card a{word-break:break-word}
 body.simple-mode .host-card>.chips{display:none}.skip-link{position:fixed;top:-100px!important;left:15px;z-index:1000}.skip-link:focus{top:12px!important}
 #beeExplorer{height:80vh;min-height:600px;max-height:900px}.top-navigation{position:sticky;top:0;z-index:12;background:var(--bg)}#view-bees{scroll-margin-top:125px}
+
+/* Garden-wide refinement: inviting reading surfaces rather than dashboard tiles. */
+:root{--petal:#f6e8df;--sunwash:#fbf1d4;--leafwash:#eaf0dc}
+[data-theme="dark"]{--petal:#43342f;--sunwash:#403925;--leafwash:#2b3b2d}
+body{line-height:1.6;background:var(--bg)}
+h1,h2,h3{overflow-wrap:break-word}
+h2{line-height:1.2}p{line-height:1.7}
+.hero{background:radial-gradient(ellipse at 85% 5%,var(--sunwash),transparent 50%),var(--soft)}
+.top-navigation{border-bottom:1px solid var(--line);padding-bottom:10px;box-shadow:0 8px 20px #34442b08}
+.tab{transition:background .18s ease,color .18s ease;border-radius:999px}
+.tab:hover,.tab:focus-visible{background:var(--soft)}
+.tab.active{box-shadow:inset 0 0 0 1px var(--line)}
+.panel,.collection-card,.compare-card,.featured-native-card{border-color:var(--line)}
+.collection-head,.host-results-heading{background:linear-gradient(115deg,var(--leafwash),var(--panel));border-radius:22px 22px 0 0}
+[data-theme="dark"] .collection-head,[data-theme="dark"] .host-results-heading{background:var(--panel-2)}
+.host-card,.collection-card,.compare-card,.featured-native-card{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.host-card:hover,.collection-card:hover,.featured-native-card:hover{border-color:var(--accent-2);box-shadow:var(--shadow)}
+.host-card .taxon-thumb{height:205px}
+.host-card-top{gap:12px}
+.host-card .host-common{color:var(--muted)}
+.host-count{color:var(--accent)}
+.kpi{border:1px solid var(--line);border-radius:18px}
+.kpi:nth-child(3n + 2){background:var(--sunwash)}
+.kpi:nth-child(3n + 3){background:var(--leafwash)}
+.dashboard-context,.metadata,.source-credit{line-height:1.7}
+.beginner-intro,.garden-insect-panel{border-radius:25px}
+.shared-bee-plant{border:1px solid var(--line);background:var(--panel);box-shadow:0 3px 10px #34442b08}
+.shared-bee-plant:hover{background:var(--soft)}
+input,select,textarea{border-radius:13px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #e9ba55;outline-offset:2px}
+.button,.tab{min-height:40px}
+.button:hover{filter:brightness(1.06)}
+#view-bees,#view-garden,#view-compare,#view-hosts,#view-scan,#hostResults{scroll-margin-top:115px}
+@media(max-width:600px){
+ .top-navigation{position:relative;top:auto}
+ .hero{background:radial-gradient(ellipse at 65% 2%,var(--sunwash),transparent 55%),var(--soft)}
+ .host-card .taxon-thumb{height:215px}
+ .tab{min-height:44px}
+ .kpi{padding:16px}
+ .collection-head,.host-results-heading{border-radius:19px 19px 0 0}
+}
