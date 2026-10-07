@@ -43,3 +43,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
  .kpi{padding:16px}
  .collection-head,.host-results-heading{border-radius:19px 19px 0 0}
 }
+
+/* County discovery is a welcoming starting point, not a replacement for the live scan. */
+.county-discovery{margin:14px 0 18px;padding:20px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,var(--leafwash),var(--panel))}
+.county-discovery label{display:block;margin-bottom:9px;font-family:Georgia,serif;font-size:1.23rem;color:var(--ink)}
+.county-discovery select{width:100%;max-width:440px;min-height:46px;background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:10px 14px}
+.county-discovery p{margin:10px 0 0;max-width:62ch;line-height:1.6}
+.local-place-results,.local-scan-status,#localLocationStatus{scroll-margin-top:105px}
+.local-place-option{min-height:44px}
+@media(max-width:600px){.county-discovery{padding:17px;margin:12px 0}.county-discovery label{font-size:1.14rem}}
