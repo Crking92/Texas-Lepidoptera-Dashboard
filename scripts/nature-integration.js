@@ -46,7 +46,25 @@ function initCountyDiscovery(){
   const note=document.createElement('p');note.className='microcopy';note.textContent='Choose a county, then select its Texas boundary from the iNaturalist matches below. The scan uses that county boundary, not a statewide guess. To check another county, repeat the scan separately.';
   chooser.append(label,select,note);
   const first=section.querySelector('h3');first.after(chooser);
-  select.addEventListener('change',()=>{if(!select.value)return;search.value=select.value+' County, Texas';find.click();const results=document.getElementById('localPlaceResults');if(results)setTimeout(()=>results.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'}),650)});
+  select.addEventListener('change',()=>{
+    if(!select.value)return;
+    search.value=select.value+' County, Texas';
+    const results=document.getElementById('localPlaceResults');
+    const motion=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
+    // The lookup is asynchronous. Move when choices actually arrive, not after an arbitrary delay.
+    if(results){
+      let observer,timeout;
+      const show=()=>{
+        if(!results.querySelector('button,a,.local-place-option') && !results.textContent.trim())return;
+        observer?.disconnect();clearTimeout(timeout);
+        results.scrollIntoView({behavior:motion,block:'nearest'});
+      };
+      observer=new MutationObserver(show);
+      observer.observe(results,{childList:true,subtree:true,characterData:true});
+      timeout=setTimeout(()=>observer.disconnect(),15000);
+    }
+    find.click();
+  });
   const results=document.getElementById('localPlaceResults');
   if(results)results.addEventListener('click',event=>{if(event.target.closest('.local-place-option')){document.getElementById('localLocationStatus')?.scrollIntoView({behavior:'smooth',block:'center'})}});
   const scan=document.getElementById('localRunScan');
