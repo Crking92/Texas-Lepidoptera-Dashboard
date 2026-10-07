@@ -1,0 +1,17 @@
+name: County live diagnostic
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['tests/county-diagnostics.cjs', '.github/workflows/county-diagnostic.yml']
+jobs:
+  county-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify county and UDELep matches
+        run: node tests/county-diagnostics.cjs
