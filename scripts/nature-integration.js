@@ -86,10 +86,21 @@ function initCountyDiscovery(){
     output.textContent='Looking up local records…';
     try{
       if(!placeId){
-        const places=await load(endpoint+'places/autocomplete?q='+encodeURIComponent(countyName+' County, Texas'));
+        // iNaturalist often names counties without a "Texas" suffix.
+        // Search the county name first, then prefer its explicit Texas ancestry.
+        const places=await load(endpoint+'places/autocomplete?q='+encodeURIComponent(countyName+' County'));
         if(token!==revision)return;
-        const match=(places.results||[]).find(p=>p.name&&p.name.toLowerCase().includes(countyName.toLowerCase())&&/texas|tx/i.test([p.display_name,p.name].join(' ')));
-        if(!match){output.textContent='County boundary could not be verified. Try Check My Area for a named-place lookup.';return}
+        const normalized=countyName.toLowerCase()+' county';
+        const candidates=(places.results||[]).filter(p=>String(p.name||'').trim().toLowerCase()===normalized);
+        const inTexas=p=>/texas|(?:^|,\\s*)tx(?:$|,)/i.test([p.display_name,p.name,p.place_guess].filter(Boolean).join(' '))||
+          (Array.isArray(p.ancestor_place_ids)&&p.ancestor_place_ids.includes(18));
+        const match=candidates.find(inTexas)||(candidates.length===1?candidates[0]:null);
+        if(!match){
+          output.textContent=candidates.length>1
+            ?'More than one county matched. Use Check My Area to select the Texas boundary.'
+            :'Could not locate this county in iNaturalist right now. Please try again.';
+          return;
+        }
         placeId=match.id;
       }
       const input=document.getElementById('hostSearch')||document.querySelector('#heroHostSearchForm input');
