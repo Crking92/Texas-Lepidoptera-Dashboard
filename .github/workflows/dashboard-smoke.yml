@@ -1,0 +1,27 @@
+name: Dashboard mobile and county smoke tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'scripts/**'
+      - 'bees/**'
+      - 'service-worker.js'
+      - 'tests/**'
+      - '.github/workflows/dashboard-smoke.yml'
+  workflow_dispatch:
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Run combined dashboard regression
+        run: node tests/combined-smoke.cjs
