@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'txlep-pwa-nature-v2-20261007';
+const CACHE_VERSION = 'txlep-pwa-nature-v3-20261007';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const CORE_ASSETS = [
   './scripts/nature-integration.js',
   './scripts/bee-host-index.js',
   './bees/index.html',
+  './bees/garden-polish.css',
   './bees/data/bee_relationships.json',
   './bees/data/bee_plant_names_families.csv',
   './bees/CREDITS_AND_DATA_USE.txt',
