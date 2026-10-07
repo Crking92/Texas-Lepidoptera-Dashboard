@@ -48,27 +48,60 @@ function initCountyDiscovery(){
   let revision=0,placeId=null,countyName='';
   const endpoint='https://api.inaturalist.org/v1/';
   const load=async(url)=>{const response=await fetch(url);if(!response.ok)throw Error('iNaturalist is temporarily unavailable');return response.json()};
+  // UDELep rows are the host-association authority. Never infer a host from
+  // county presence alone, and never count observations as unique species.
+  function sourceSpeciesFor(genus){
+    if(typeof records==='undefined'||!Array.isArray(records))return null;
+    const exact=new Set(), plant=genus.toLowerCase();
+    const scientific=/^[A-Z][a-z-]+\\s+[a-z][a-z-]+(?:\\s+.*)?$/;
+    const plantFields=['host_genus','hostGenus','plant_genus','plantGenus','host_plant_genus','hostPlantGenus','host_plant','hostPlant'];
+    const insectFields=['scientific_name','scientificName','species','species_name','speciesName','lepidoptera','lepidoptera_name','taxon_name','taxonName'];
+    for(const row of records){
+      if(!row||typeof row!=='object')continue;
+      const plants=plantFields.map(k=>row[k]).filter(v=>typeof v==='string');
+      if(!plants.some(v=>v.toLowerCase().split(/[,;|]/).some(x=>x.trim().split(/\\s+/)[0]===plant)))continue;
+      const names=insectFields.map(k=>row[k]).filter(v=>typeof v==='string');
+      names.forEach(name=>{const parts=name.trim().match(/^([A-Z][a-z-]+\\s+[a-z][a-z-]+)/);if(parts&&scientific.test(parts[1]))exact.add(parts[1].toLowerCase())});
+    }
+    return exact.size?exact:null;
+  }
+  async function countyLepidoptera(place,species,token){
+    // iNaturalist Lepidoptera taxon ID. Page until complete or the safety cap.
+    const matched=new Set(),limit=12;
+    for(let page=1;page<=limit;page++){
+      const url=endpoint+'observations/species_counts?place_id='+encodeURIComponent(place)+'&taxon_id=47157&quality_grade=research&per_page=500&page='+page;
+      const data=await load(url);
+      if(token!==revision)return null;
+      for(const item of data.results||[]){
+        const name=item.taxon?.name?.match(/^([A-Z][a-z-]+\\s+[a-z][a-z-]+)/)?.[1]?.toLowerCase();
+        if(name&&species.has(name))matched.add(name);
+      }
+      if(page*500>=Number(data.total_results||0))return {count:matched.size,complete:true};
+    }
+    return {count:matched.size,complete:false};
+  }
   async function update(){
     const token=++revision;
-    if(!countyName){output.textContent='Showing Texas-wide UDELep host relationships. Use Check My Area for a map, circles, and polygons.';return}
-    output.textContent='Looking for county records…';
+    if(!countyName){output.textContent='All of Texas · The plant cards show statewide UDELep host relationships. Check My Area remains your map and polygon tool.';return}
+    output.textContent='Looking up local records…';
     try{
       if(!placeId){
         const places=await load(endpoint+'places/autocomplete?q='+encodeURIComponent(countyName+' County, Texas'));
         if(token!==revision)return;
         const match=(places.results||[]).find(p=>p.name&&p.name.toLowerCase().includes(countyName.toLowerCase())&&/texas|tx/i.test([p.display_name,p.name].join(' ')));
-        if(!match){output.textContent='County boundary not confirmed. Use Check My Area to choose the correct named place.';return}
+        if(!match){output.textContent='County boundary could not be verified. Try Check My Area for a named-place lookup.';return}
         placeId=match.id;
       }
       const input=document.getElementById('hostSearch')||document.querySelector('#heroHostSearchForm input');
       const query=(input?.value||'').trim();
-      if(!query){output.textContent=countyName+' County selected. Search for a plant above to check its local observation evidence. Texas host totals remain unchanged.';return}
+      if(!query){output.textContent=countyName+' County selected. Search a host plant above to compare Texas-wide host relationships with county-documented butterflies and moths.';return}
       const genus=(typeof hosts!=='undefined'&&hosts.find(h=>h.genus.toLowerCase()===query.toLowerCase())?.genus)||query.split(/\\s+/)[0];
-      const data=await load(endpoint+'observations/species_counts?place_id='+encodeURIComponent(placeId)+'&taxon_name='+encodeURIComponent(genus)+'&per_page=1');
-      if(token!==revision)return;
-      const count=Number(data.total_results)||0;
-      output.textContent=count?genus+': '+count+' observed taxa returned in '+countyName+' County by iNaturalist. This is a plant-occurrence indicator, not the number of Lepidoptera hosted here.':'No matching observed taxa returned for '+genus+' in '+countyName+' County. This does not mean the plant is absent.';
-    }catch(e){if(token===revision)output.textContent='County records could not load. Texas host totals remain available; try again or use Check My Area.'}
+      const source=sourceSpeciesFor(genus);
+      if(!source){output.textContent='Texas host totals are still shown on the plant cards. A reliable species-level UDELep crosswalk for '+genus+' was not found in the quick lookup; use Check My Area for a more detailed analysis.';return}
+      const county=await countyLepidoptera(placeId,source,token);
+      if(token!==revision||!county)return;
+      output.textContent=genus+' · '+countyName+' County: '+county.count+(county.complete?'':' or more')+' UDELep-linked butterfly/moth species with Research Grade iNaturalist records here ('+(county.complete?'county result pages complete':'county result pages incomplete')+'). Texas-wide host potential remains separate on the plant cards. Local observation does not prove local host use.';
+    }catch(e){if(token===revision)output.textContent='Local comparison could not load. Texas host totals remain available; the map scanner is unchanged.'}
   }
   select.addEventListener('change',()=>{countyName=select.value;placeId=null;update()});
   const form=document.getElementById('heroHostSearchForm');
