@@ -46,7 +46,7 @@ function initCountyDiscovery(){
   const output=document.createElement('div');output.id='countyQuickSummary';output.className='county-quick-summary';output.setAttribute('role','status');output.setAttribute('aria-live','polite');
   chooser.append(label,select,note,output);hero.insertAdjacentElement('afterend',chooser);
 
-  const api='https://api.inaturalist.org/v1/', cachePrefix='txlep-county-overlap-v2-', maxAge=30*86400000;
+  const api='https://api.inaturalist.org/v1/', cachePrefix='txlep-county-overlap-v3-', maxAge=30*86400000;
   let county='',revision=0,aborter=null,ready=false,matchedIds=new Set(),pending=false,failed=false;
   const normalizedSpecies=name=>{
     const match=String(name||'').trim().match(/^([A-Z][a-z-]+)\s+([a-z][a-z-]+)/);
@@ -171,7 +171,7 @@ function initCountyDiscovery(){
   function cached(name){
     try{
       const item=JSON.parse(localStorage.getItem(cachePrefix+name)||'null');
-      return item&&item.source===stats.sourceDate&&Date.now()-item.saved<maxAge&&Array.isArray(item.ids)?item:null;
+      return item&&item.source===stats.sourceDate&&Date.now()-item.saved<maxAge&&Array.isArray(item.ids)&&!(name==='Hays'&&item.total>100&&item.ids.length===0)?item:null;
     }catch(_){return null}
   }
   async function loadCounty(name,token){
@@ -192,6 +192,11 @@ function initCountyDiscovery(){
         }
         output.textContent='Checking '+name+' County observations… page '+page;
         if(page*perPage>=Number(result.total_results||0)){
+          // Hays has extensive known Lepidoptera/UDELep overlap. An empty match
+          // here signals a failed scientific-name join, never a genuine zero.
+          if(name==='Hays'&&Number(result.total_results||0)>100&&found.size===0){
+            throw Error('County taxa were returned but did not match UDELep names');
+          }
           matchedIds=found;ready=true;pending=false;
           const saved={source:stats.sourceDate,saved:Date.now(),ids:[...found],total:Number(result.total_results||0)};
           try{localStorage.setItem(cachePrefix+name,JSON.stringify(saved))}catch(_){}
