@@ -65,7 +65,6 @@ function initCountyDiscovery(){
       }
     });
   }
-  window.__countyQuickDiagnostic={sourceVisible:typeof records,hostMapVisible:typeof hostRecordMap,indexSize:nameToRecords.size,stryIds:[...(nameToRecords.get('strymon melinus')||[])],oakStryIds:typeof hostRecordMap!=='undefined'?(hostRecordMap.get('Quercus')||[]).filter(r=>/^Strymon melinus/.test(r.species)).map(r=>String(r.id)):[]};
   const countFor=genus=>{
     if(!ready||typeof hostRecordMap==='undefined')return null;
     const rows=hostRecordMap.get(genus)||[];
@@ -104,7 +103,6 @@ function initCountyDiscovery(){
         pair.append(texas,local);
       }
       const local=pair.querySelector('.host-county-metric');
-      if(genus==='Quercus'&&window.__countyQuickDiagnostic)window.__countyQuickDiagnostic.paintProbe={ready,pending,genus,found:matchedIds.size,hasStry:matchedIds.has('11909'),count:countFor(genus),hostRows:hostRecordMap.get(genus)?.length};
       local.querySelector('strong').textContent=ready?fmt.format(countFor(genus)):pending?'…':'—';
       local.querySelector('span').textContent=county+' County observed';
     });
@@ -192,7 +190,6 @@ function initCountyDiscovery(){
           const key=normalizedSpecies(item.taxon?.name);
           if(key)for(const id of nameToRecords.get(key)||[])found.add(id);
         }
-        window.__countyQuickDiagnostic.lastPage={items:result.results?.slice(0,3).map(x=>x.taxon?.name),normalized:result.results?.slice(0,3).map(x=>normalizedSpecies(x.taxon?.name)),found:[...found].slice(0,6),totalFound:found.size};
         output.textContent='Checking '+name+' County observations… page '+page;
         if(page*perPage>=Number(result.total_results||0)){
           // Hays has extensive known Lepidoptera/UDELep overlap. An empty match
@@ -201,7 +198,6 @@ function initCountyDiscovery(){
             throw Error('County taxa were returned but did not match UDELep names');
           }
           matchedIds=found;ready=true;pending=false;
-          window.__countyQuickDiagnostic.completed={ready,found:[...found],hasStry:found.has('11909'),oakCount:countFor('Quercus')};
           const saved={source:stats.sourceDate,saved:Date.now(),ids:[...found],total:Number(result.total_results||0)};
           try{localStorage.setItem(cachePrefix+name,JSON.stringify(saved))}catch(_){}
           output.textContent=name+' County · '+saved.total+' butterfly/moth taxa checked. Each plant now shows Texas-wide host taxa beside the matching species documented in this county. Observation does not prove feeding.';
