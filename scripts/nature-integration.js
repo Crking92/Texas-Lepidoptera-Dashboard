@@ -87,7 +87,7 @@ function initCountyDiscovery(){
   function paintHostCards(){
     const grid=document.getElementById('hostGrid');if(!grid)return;
     grid.querySelectorAll('.host-card').forEach(card=>{
-      const genus=card.querySelector('.host-name')?.textContent?.trim();
+      const genus=card.querySelector('.garden-toggle[data-genus]')?.dataset.genus||card.querySelector('.host-name')?.textContent?.trim();
       const original=card.querySelector('.host-count');if(!genus||!original)return;
       let pair=card.querySelector('.host-count-pair');
       if(!county){
