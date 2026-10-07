@@ -1,3 +1,17 @@
+# Texas Plants, Bees, Butterflies & Moths
+
+## Combined garden explorer — October 7, 2026
+
+The original Lepidoptera dashboard now includes the qualified Fowler bee explorer in a local same-origin module. Plant cards link to bee records where available. My Garden shares the existing txlep-garden storage key and reports deduplicated bees separately from caterpillar-host taxa. Existing beeGarden names are imported once without clearing either legacy list. Bee-only plant groups remain visible and removable in the shared garden. Plant comparison adds separate bee union/intersection counts.
+
+Both datasets retain their original scope, source notices, qualifications, and downloads. The Lepidoptera embedded dataset and local scan logic are unchanged. The local scanner remains a Lepidoptera/plant tool; it does not claim to survey bees.
+
+Original garden artwork and warm styling unify the interface. Bee figures are decorative, not identification references. The service worker caches the local bee module and removes only this app’s old caches. The separate Central-Texas-Bee-Relationships repository remains available.
+
+Browser verification: node tests/combined-smoke.cjs (requires Playwright and Chromium).
+
+---
+
 # Texas Butterflies, Moths & Host Plants
 
 A beginner-friendly, plant-first dashboard for exploring UDELep host relationships among Lepidoptera whose source range includes Texas.

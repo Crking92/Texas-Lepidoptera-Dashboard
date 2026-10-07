@@ -36,3 +36,6 @@ The interactive vicinity map uses Leaflet 1.9.4 (BSD-2-Clause) and Leaflet.draw 
 Basemap tiles and address/place search are provided by OpenStreetMap services. Map data © OpenStreetMap contributors under the Open Database License; the interface keeps visible OpenStreetMap attribution. Standard map tiles are requested only for normal interactive viewing. Manual address/place search uses the public Nominatim service only after an explicit search action, with no autocomplete and an in-page cache/rate limit.
 
 The public OpenStreetMap tile and Nominatim services are community-funded services with usage policies and no availability guarantee. A production/high-traffic deployment should be prepared to switch to another compliant tile/geocoding provider if usage grows.
+
+BEE SOURCE COLLECTION
+Jarrod Fowler (2020), Pollen Specialist Bees of the Central United States, https://jarrodfowler.com/bees_pollen.html, accessed October 7, 2026. Qualified bee links are a separate source collection. UDELep’s ODbL terms do not grant rights to Fowler’s material. See bees/CREDITS_AND_DATA_USE.txt for full credit, uncertainty, rank, primary-reference, and reuse notes. Original decorative SVG garden artwork is by this dashboard; no NWF or Xerces artwork is reproduced.

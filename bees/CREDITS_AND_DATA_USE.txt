@@ -1,0 +1,32 @@
+Texas Specialist Bees & Pollen Hosts — interface version 0.5.0 (dataset 0.4.0)
+
+RELATIONSHIP COMPILATION
+Jarrod Fowler (2020). Pollen Specialist Bees of the Central United States.
+https://jarrodfowler.com/bees_pollen.html
+Accessed October 7, 2026.
+
+Factual bee identities and host associations are adapted for bees with TX in the source States cell. The compilation is not represented as Glass Root Garden's original research. Interface, indexing, and aggregation: Glass Root Garden. No endorsement or partnership is implied.
+
+Each relationship retains its source ID, URL, access date, row index, target rank, and qualification. A row index applies only to the recorded snapshot; the JSON source hash supports reproducibility. Source-provided profile links are not automatic verification of every relationship.
+
+ADDITIONAL PRIMARY REFERENCE
+Bossert, S., Zabinski, W., and Neff, J. L. (2026). A new species of Andrena (Labergeia) from Texas with an unusual phenology and floral host, including a redescription of Labergeia (Hymenoptera: Andrenidae). Journal of Melittology 141.
+https://doi.org/10.17161/jom.vi141.24606
+This link accompanies Andrena cenizophila; its dataset relationship remains Fowler's genus-level entry. The article states CC BY-NC-ND 4.0. No article figures or prose are reproduced.
+
+INTERPRETATION
+Ordinary counts use unqualified genus-level entries and deduplicate bees. Tentative and family-only records are shown separately. TX membership and local occurrence do not verify a locally observed association. A genus entry does not establish every constituent species as a host. Original names and family labels can reflect older taxonomy. Missing specialist entries are not proof that a plant has no bee value.
+
+This release does not bundle rarity categories, flight calendars, taxonomic authorities, author prose, photographs, supplementary regional relationships, or cuckoo-bee associations. Botanical metadata is not inherited silently from preceding source rows.
+
+INATURALIST
+https://www.inaturalist.org/
+Optional sightings require the visitor's explicit location-check action. Observations do not create or verify pollen-host links. Results link to original observations; observer photographs are not reproduced.
+
+REUSE
+No explicit reuse license was located on the reviewed source pages. Source content is not labelled public domain or Creative Commons by this dashboard, and no new source-content license is granted. Public availability and attribution are not themselves licenses for protected text, photos, or original authorship in a compilation. Individual factual data are distinct from protected expression. This note does not determine the copyright status of a particular compilation. Contact the author about reuse terms where needed for substantial republication or distribution.
+
+Future images require creator credit, original URL, license, license link, and any required modification notice. Site-level credit does not replace image-specific permission.
+
+DESIGN AND COMMON-NAME NAVIGATION
+Layout inspiration: National Wildlife Federation Native Plant Finder (https://nativeplantfinder.nwf.org/) and Xerces Bring Back the Pollinators (https://xerces.org/bring-back-the-pollinators), reviewed October 7, 2026. No website artwork, photographs, logos, or source code are reused. The dashboard illustrations are original decorative SVG motifs, not species identification images. Common names label plant groups, not specific species or additional host evidence. Sources for familiar names include U.S. Fish & Wildlife Service, Top plants for your pollinator garden (https://www.fws.gov/story/top-plants-your-pollinator-garden), and NWF regional plant lists.

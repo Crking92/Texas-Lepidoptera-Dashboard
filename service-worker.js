@@ -1,7 +1,14 @@
-const CACHE_VERSION = 'txlep-pwa-v15-20260821';
+const CACHE_VERSION = 'txlep-pwa-nature-v2-20261007';
 const CORE_ASSETS = [
   './',
   './index.html',
+  './scripts/nature-garden.css',
+  './scripts/nature-integration.js',
+  './scripts/bee-host-index.js',
+  './bees/index.html',
+  './bees/data/bee_relationships.json',
+  './bees/data/bee_plant_names_families.csv',
+  './bees/CREDITS_AND_DATA_USE.txt',
   './manifest.webmanifest',
   './favicon.svg',
   './icons/icon-192.png',
@@ -22,7 +29,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE_VERSION).map(key => caches.delete(key))))
+      .then(keys => Promise.all(keys.filter(key => key.startsWith('txlep-pwa-') && key !== CACHE_VERSION).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
