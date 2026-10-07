@@ -32,50 +32,48 @@ renderGardenBeeConnections();renderCompareBeeConnections(comparePlants.filter(Bo
 }
 
 
-/* County-first discovery: use the existing iNaturalist named-place scanner. */
+/* Quick county context is separate from the detailed Check My Area map scanner.
+   UDELep host counts remain Texas-wide; county presence is iNaturalist evidence. */
 function initCountyDiscovery(){
-  const search=document.getElementById('localPlaceSearch'),find=document.getElementById('localFindPlace');
-  if(!search||!find||document.getElementById('countyQuickSelect'))return;
-  const section=search.closest('.local-scan-section');
-  if(!section)return;
+  const heroSearch=document.querySelector('.hero-search')||document.getElementById('heroHostSearchForm');
+  if(!heroSearch||document.getElementById('countyQuickSelect'))return;
   const chooser=document.createElement('div');chooser.className='county-discovery';
-  const label=document.createElement('label');label.htmlFor='countyQuickSelect';label.textContent='Or explore plants and insects near you';
+  const label=document.createElement('label');label.htmlFor='countyQuickSelect';label.textContent='Explore by county';
   const select=document.createElement('select');select.id='countyQuickSelect';select.className='control';
   const counties=['Hays','Travis','Comal','Blanco','Caldwell','Guadalupe','Bexar','Kendall','Burnet','Gillespie','Llano','Kerr','Bandera','Medina','San Saba','Mason','Kimble','Sutton','Edwards','Real','Uvalde','McCulloch','Concho','Tom Green','Menard','Schleicher'];
-  [['','Choose a county…'],...counties.map(name=>[name,name+' County'])].forEach(([value,text])=>{const option=document.createElement('option');option.value=value;option.textContent=text;select.append(option)});
-  const note=document.createElement('p');note.className='microcopy';note.textContent='Explore the plants and insects recorded around you. Choose a county, then tap the matching Texas county in the results. We’ll use its real boundary for the iNaturalist check—not a statewide estimate. Want to explore a neighboring county? Choose it next.';
-  chooser.append(label,select,note);
-  const heroSearch=document.querySelector('.hero-search')||document.getElementById('heroHostSearchForm');
-  if(heroSearch)heroSearch.insertAdjacentElement('afterend',chooser);
-  else {const first=section.querySelector('h3');if(first)first.after(chooser);else section.prepend(chooser)}
-  select.addEventListener('change',()=>{
-    if(!select.value)return;
-    search.value=select.value+' County, Texas';
-    // Reveal the existing county-boundary picker before running its real lookup.
-    if(typeof switchTab==='function')switchTab('local');
-    const results=document.getElementById('localPlaceResults');
-    const motion=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
-    // The lookup is asynchronous. Move when choices actually arrive, not after an arbitrary delay.
-    if(results){
-      let observer,timeout;
-      const show=()=>{
-        if(!results.querySelector('button,a,.local-place-option') && !results.textContent.trim())return;
-        observer?.disconnect();clearTimeout(timeout);
-        results.scrollIntoView({behavior:motion,block:'nearest'});
-      };
-      observer=new MutationObserver(show);
-      observer.observe(results,{childList:true,subtree:true,characterData:true});
-      timeout=setTimeout(()=>observer.disconnect(),15000);
-    }
-    find.click();
-  });
-  const results=document.getElementById('localPlaceResults');
-  if(results)results.addEventListener('click',event=>{if(event.target.closest('.local-place-option')){document.getElementById('localLocationStatus')?.scrollIntoView({behavior:'smooth',block:'center'})}});
-  const scan=document.getElementById('localRunScan');
-  if(scan)scan.addEventListener('click',()=>setTimeout(()=>document.getElementById('localScanStatus')?.scrollIntoView({behavior:'smooth',block:'start'}),80));
-  const tabButtons=document.querySelectorAll('[data-tab]');
-  tabButtons.forEach(button=>button.addEventListener('click',()=>{
-    const target=document.getElementById('view-'+button.dataset.tab);
-    if(target)setTimeout(()=>{if(target.classList.contains('active'))target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})},40);
-  }));
+  [['','All of Texas'],...counties.map(name=>[name,name+' County'])].forEach(([value,title])=>{const option=document.createElement('option');option.value=value;option.textContent=title;select.append(option)});
+  const note=document.createElement('p');note.className='microcopy';note.textContent='Texas host totals stay visible. Choose a county to check local plant records from iNaturalist—these are not confirmed local caterpillar-host counts.';
+  const output=document.createElement('div');output.id='countyQuickSummary';output.className='county-quick-summary';output.setAttribute('role','status');output.setAttribute('aria-live','polite');
+  chooser.append(label,select,note,output);heroSearch.insertAdjacentElement('afterend',chooser);
+  let revision=0,placeId=null,countyName='';
+  const endpoint='https://api.inaturalist.org/v1/';
+  const load=async(url)=>{const response=await fetch(url);if(!response.ok)throw Error('iNaturalist is temporarily unavailable');return response.json()};
+  async function update(){
+    const token=++revision;
+    if(!countyName){output.textContent='Showing Texas-wide UDELep host relationships. Use Check My Area for a map, circles, and polygons.';return}
+    output.textContent='Looking for county records…';
+    try{
+      if(!placeId){
+        const places=await load(endpoint+'places/autocomplete?q='+encodeURIComponent(countyName+' County, Texas'));
+        if(token!==revision)return;
+        const match=(places.results||[]).find(p=>p.name&&p.name.toLowerCase().includes(countyName.toLowerCase())&&/texas|tx/i.test([p.display_name,p.name].join(' ')));
+        if(!match){output.textContent='County boundary not confirmed. Use Check My Area to choose the correct named place.';return}
+        placeId=match.id;
+      }
+      const input=document.getElementById('hostSearch')||document.querySelector('#heroHostSearchForm input');
+      const query=(input?.value||'').trim();
+      if(!query){output.textContent=countyName+' County selected. Search for a plant above to check its local observation evidence. Texas host totals remain unchanged.';return}
+      const genus=(typeof hosts!=='undefined'&&hosts.find(h=>h.genus.toLowerCase()===query.toLowerCase())?.genus)||query.split(/\\s+/)[0];
+      const data=await load(endpoint+'observations/species_counts?place_id='+encodeURIComponent(placeId)+'&taxon_name='+encodeURIComponent(genus)+'&per_page=1');
+      if(token!==revision)return;
+      const count=Number(data.total_results)||0;
+      output.textContent=count?genus+': '+count+' observed taxa returned in '+countyName+' County by iNaturalist. This is a plant-occurrence indicator, not the number of Lepidoptera hosted here.':'No matching observed taxa returned for '+genus+' in '+countyName+' County. This does not mean the plant is absent.';
+    }catch(e){if(token===revision)output.textContent='County records could not load. Texas host totals remain available; try again or use Check My Area.'}
+  }
+  select.addEventListener('change',()=>{countyName=select.value;placeId=null;update()});
+  const form=document.getElementById('heroHostSearchForm');
+  form?.addEventListener('submit',()=>{if(countyName)setTimeout(update,0)});
+  const input=document.getElementById('hostSearch');
+  input?.addEventListener('change',()=>{if(countyName)update()});
+  update();
 }
