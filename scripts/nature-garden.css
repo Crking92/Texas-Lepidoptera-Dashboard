@@ -52,3 +52,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
 .local-place-results,.local-scan-status,#localLocationStatus{scroll-margin-top:105px}
 .local-place-option{min-height:44px}
 @media(max-width:600px){.county-discovery{padding:17px;margin:12px 0}.county-discovery label{font-size:1.14rem}}
+
+/* County discovery lives immediately below the homepage plant search. */
+.hero>.county-discovery{width:57%;max-width:650px;margin:12px 0 0;padding:12px 16px;background:var(--panel);border:1px solid var(--line);border-radius:18px}
+.hero>.county-discovery label{font-family:inherit;font-size:.9rem;font-weight:700;margin:0 0 7px}
+.hero>.county-discovery select{width:100%;max-width:none;min-height:44px}
+.hero>.county-discovery p{font-size:.77rem;line-height:1.5;margin:8px 0 0}
+@media(max-width:600px){.hero>.county-discovery{width:100%;max-width:none;padding:12px;margin:12px 0 0}}
