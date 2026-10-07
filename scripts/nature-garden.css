@@ -59,3 +59,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
 .hero>.county-discovery select{width:100%;max-width:none;min-height:44px}
 .hero>.county-discovery p{font-size:.77rem;line-height:1.5;margin:8px 0 0}
 @media(max-width:600px){.hero>.county-discovery{width:100%;max-width:none;padding:12px;margin:12px 0 0}}
+
+/* Quick regional context is not the polygon mapping tool. */
+.hero>.county-discovery .county-quick-summary{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--soft);color:var(--ink);font-size:.81rem;line-height:1.55}
+.hero>.county-discovery p{max-width:65ch}
