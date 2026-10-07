@@ -65,6 +65,7 @@ function initCountyDiscovery(){
       }
     });
   }
+  window.__countyQuickDiagnostic={sourceVisible:typeof records,hostMapVisible:typeof hostRecordMap,indexSize:nameToRecords.size,stryIds:[...(nameToRecords.get('strymon melinus')||[])],oakStryIds:typeof hostRecordMap!=='undefined'?(hostRecordMap.get('Quercus')||[]).filter(r=>/^Strymon melinus/.test(r.species)).map(r=>String(r.id)):[]};
   const countFor=genus=>{
     if(!ready||typeof hostRecordMap==='undefined')return null;
     const rows=hostRecordMap.get(genus)||[];
