@@ -179,7 +179,7 @@ function buildIndexes() {
 function setView(name) {
   $$('.view').forEach(view => view.classList.toggle('active', view.id === `view-${name}`));
   $$('.nav-btn').forEach(button => button.classList.toggle('active', button.dataset.view === name));
-  window.scrollTo({top:0, behavior:'smooth'}); $('#app').focus({preventScroll:true});
+  const activeView = document.getElementById('view-' + name); if (activeView) activeView.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
   if (name === 'plants') renderPlants();
   if (name === 'bees') renderBees();
   if (name === 'garden') renderGarden();
