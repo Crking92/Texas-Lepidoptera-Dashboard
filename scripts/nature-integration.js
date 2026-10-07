@@ -32,92 +32,171 @@ renderGardenBeeConnections();renderCompareBeeConnections(comparePlants.filter(Bo
 }
 
 
-/* Quick county context is separate from the detailed Check My Area map scanner.
-   UDELep host counts remain Texas-wide; county presence is iNaturalist evidence. */
+/* County quick-filter is NOT the "Check My Area" map.
+   UDELep = Texas-range host associations; iNaturalist = county occurrence evidence. */
 function initCountyDiscovery(){
-  const heroSearch=document.querySelector('.hero-search')||document.getElementById('heroHostSearchForm');
-  if(!heroSearch||document.getElementById('countyQuickSelect'))return;
+  const hero=document.querySelector('.hero-search')||document.getElementById('heroHostSearchForm');
+  if(!hero||document.getElementById('countyQuickSelect'))return;
   const chooser=document.createElement('div');chooser.className='county-discovery';
   const label=document.createElement('label');label.htmlFor='countyQuickSelect';label.textContent='Explore by county';
   const select=document.createElement('select');select.id='countyQuickSelect';select.className='control';
-  const counties=['Hays','Travis','Comal','Blanco','Caldwell','Guadalupe','Bexar','Kendall','Burnet','Gillespie','Llano','Kerr','Bandera','Medina','San Saba','Mason','Kimble','Sutton','Edwards','Real','Uvalde','McCulloch','Concho','Tom Green','Menard','Schleicher'];
+  const counties=['Hays','Travis','Comal','Blanco','Caldwell','Guadalupe','Bexar','Kendall','Burnet','Gillespie','Llano','Kerr','Bandera','Medina','San Saba','Mason','Kimble','Sutton','Edwards','Real','Uvalde','McCulloch','Concho','Tom Green','Menard','Schleicher'].sort((a,b)=>a.localeCompare(b));
   [['','All of Texas'],...counties.map(name=>[name,name+' County'])].forEach(([value,title])=>{const option=document.createElement('option');option.value=value;option.textContent=title;select.append(option)});
-  const note=document.createElement('p');note.className='microcopy';note.textContent='Texas host totals stay visible. Choose a county to check local plant records from iNaturalist—these are not confirmed local caterpillar-host counts.';
+  const note=document.createElement('p');note.className='microcopy';note.textContent='Compare each plant’s Texas-wide host count with the subset of linked butterfly and moth species documented in your county. County observations do not prove local caterpillar feeding.';
   const output=document.createElement('div');output.id='countyQuickSummary';output.className='county-quick-summary';output.setAttribute('role','status');output.setAttribute('aria-live','polite');
-  chooser.append(label,select,note,output);heroSearch.insertAdjacentElement('afterend',chooser);
-  let revision=0,placeId=null,countyName='';
-  const endpoint='https://api.inaturalist.org/v1/';
-  const load=async(url)=>{const response=await fetch(url);if(!response.ok)throw Error('iNaturalist is temporarily unavailable');return response.json()};
-  // UDELep rows are the host-association authority. Never infer a host from
-  // county presence alone, and never count observations as unique species.
-  function sourceSpeciesFor(genus){
-    if(typeof records==='undefined'||!Array.isArray(records))return null;
-    const exact=new Set(), plant=genus.toLowerCase();
-    const scientific=/^[A-Z][a-z-]+\\s+[a-z][a-z-]+(?:\\s+.*)?$/;
-    const plantFields=['host_genus','hostGenus','plant_genus','plantGenus','host_plant_genus','hostPlantGenus','host_plant','hostPlant'];
-    const insectFields=['scientific_name','scientificName','species','species_name','speciesName','lepidoptera','lepidoptera_name','taxon_name','taxonName'];
-    for(const row of records){
-      if(!row||typeof row!=='object')continue;
-      const plants=plantFields.map(k=>row[k]).filter(v=>typeof v==='string');
-      if(!plants.some(v=>v.toLowerCase().split(/[,;|]/).some(x=>x.trim().split(/\\s+/)[0]===plant)))continue;
-      const names=insectFields.map(k=>row[k]).filter(v=>typeof v==='string');
-      names.forEach(name=>{const parts=name.trim().match(/^([A-Z][a-z-]+\\s+[a-z][a-z-]+)/);if(parts&&scientific.test(parts[1]))exact.add(parts[1].toLowerCase())});
-    }
-    return exact.size?exact:null;
-  }
-  async function countyLepidoptera(place,species,token){
-    // iNaturalist Lepidoptera taxon ID. Page until complete or the safety cap.
-    const matched=new Set(),limit=12;
-    for(let page=1;page<=limit;page++){
-      const url=endpoint+'observations/species_counts?place_id='+encodeURIComponent(place)+'&taxon_id=47157&quality_grade=research&per_page=500&page='+page;
-      const data=await load(url);
-      if(token!==revision)return null;
-      for(const item of data.results||[]){
-        const name=item.taxon?.name?.match(/^([A-Z][a-z-]+\\s+[a-z][a-z-]+)/)?.[1]?.toLowerCase();
-        if(name&&species.has(name))matched.add(name);
+  chooser.append(label,select,note,output);hero.insertAdjacentElement('afterend',chooser);
+
+  const api='https://api.inaturalist.org/v1/', cachePrefix='txlep-county-overlap-v2-', maxAge=30*86400000;
+  let county='',revision=0,aborter=null,ready=false,matchedIds=new Set(),pending=false,failed=false;
+  const normalizedSpecies=name=>{
+    const match=String(name||'').trim().match(/^([A-Z][a-z-]+)\s+([a-z][a-z-]+)/);
+    return match?(match[1]+' '+match[2]).toLowerCase():null;
+  };
+  // Match research-grade county taxon names to actual UDELep rows, not to
+  // the total number of moth observations or the number of plant observations.
+  const nameToRecords=new Map();
+  if(typeof records!=='undefined'){
+    records.filter(r=>['established','both'].includes(r.statusKey)).forEach(r=>{
+      const names=[r.species,...(String(r.synonyms||'').match(/[A-Z][a-z-]+\s+[a-z][a-z-]+/g)||[])];
+      for(const name of names){
+        const key=normalizedSpecies(name);if(!key)continue;
+        if(!nameToRecords.has(key))nameToRecords.set(key,new Set());
+        nameToRecords.get(key).add(String(r.id));
       }
-      if(page*500>=Number(data.total_results||0))return {count:matched.size,complete:true};
-    }
-    return {count:matched.size,complete:false};
+    });
   }
-  async function update(){
-    const token=++revision;
-    if(!countyName){output.textContent='All of Texas · The plant cards show statewide UDELep host relationships. Check My Area remains your map and polygon tool.';return}
-    output.textContent='Looking up local records…';
+  const countFor=genus=>{
+    if(!ready||typeof hostRecordMap==='undefined')return null;
+    const rows=hostRecordMap.get(genus)||[];
+    return new Set(rows.filter(r=>matchedIds.has(String(r.id))).map(r=>String(r.id))).size;
+  };
+  function addMetric(container,className,labelText,valueText){
+    if(!container)return;
+    let metric=container.querySelector('.county-added-metric');
+    if(!county){metric?.remove();return}
+    if(!metric){
+      metric=document.createElement('div');metric.className='county-added-metric '+className;
+      const number=document.createElement('strong');number.className='county-added-number';
+      const label=document.createElement('span');label.className='county-added-label';
+      metric.append(number,label);container.append(metric);
+    }
+    metric.querySelector('.county-added-number').textContent=valueText;
+    metric.querySelector('.county-added-label').textContent=labelText;
+  }
+  function paintHostCards(){
+    const grid=document.getElementById('hostGrid');if(!grid)return;
+    grid.querySelectorAll('.host-card').forEach(card=>{
+      const genus=card.querySelector('.host-name')?.textContent?.trim();
+      const original=card.querySelector('.host-count');if(!genus||!original)return;
+      let pair=card.querySelector('.host-count-pair');
+      if(!county){
+        if(pair){const texas=pair.querySelector('.host-texas-metric');if(texas)pair.replaceWith(...texas.childNodes)}
+        return;
+      }
+      if(!pair){
+        const formerLabel=original.nextElementSibling?.classList.contains('microcopy')?original.nextElementSibling:null;
+        pair=document.createElement('div');pair.className='host-count-pair';
+        const texas=document.createElement('div');texas.className='host-texas-metric';
+        original.before(pair);texas.append(original);if(formerLabel)texas.append(formerLabel);
+        const local=document.createElement('div');local.className='host-county-metric';
+        local.append(document.createElement('strong'),document.createElement('span'));
+        pair.append(texas,local);
+      }
+      const local=pair.querySelector('.host-county-metric');
+      local.querySelector('strong').textContent=ready?fmt.format(countFor(genus)):pending?'…':'—';
+      local.querySelector('span').textContent=county+' County observed';
+    });
+  }
+  function paintOtherCards(){
+    const value=genus=>ready?fmt.format(countFor(genus)):pending?'…':'—';
+    document.querySelectorAll('.featured-native-card').forEach(card=>{
+      const genus=card.querySelector('.featured-native-name')?.textContent?.trim();
+      if(genus)addMetric(card.querySelector('.featured-native-stats'),'featured-stat',county+' Co. observed',value(genus));
+    });
+    document.querySelectorAll('.collection-card').forEach(card=>{
+      const genus=card.querySelector('.collection-name')?.textContent?.trim();
+      if(genus)addMetric(card.querySelector('.collection-metrics'),'mini-metric',county+' Co. observed',value(genus));
+    });
+    document.querySelectorAll('.compare-card').forEach(card=>{
+      const genus=card.querySelector('.collection-name')?.textContent?.trim();
+      if(genus)addMetric(card.querySelector('.compare-metrics')||card,'county-compare-metric',county+' Co. observed',value(genus));
+    });
+  }
+  function paint(){paintHostCards();paintOtherCards()}
+  // Core pagination, searching and My Garden replace cards. Reapply only
+  // when direct card children change, not when the county label changes.
+  ['hostGrid','featuredNativeGrid','gardenGrid','gardenRecommendations','compareGrid'].forEach(id=>{
+    const grid=document.getElementById(id);if(grid)new MutationObserver(paint).observe(grid,{childList:true});
+  });
+  const apiGet=async(path,signal)=>{
+    const result=await fetch(api+path,{signal});
+    if(!result.ok)throw Error('iNaturalist returned '+result.status);
+    return result.json();
+  };
+  async function resolveCounty(name,signal){
+    if(name==='Hays')return 326; // iNaturalist's established Hays County, TX place
+    const places=await apiGet('places/autocomplete?q='+encodeURIComponent(name+' County'),signal);
+    const list=(places.results||[]).filter(p=>String(p.name||'').toLowerCase().trim()===(name+' County').toLowerCase());
+    const texas=p=>/texas|(?:^|,\s*)tx(?:$|,)/i.test([p.display_name,p.name].filter(Boolean).join(' '))||
+      (Array.isArray(p.ancestor_place_ids)&&p.ancestor_place_ids.includes(18));
+    let match=list.find(texas);
+    // For duplicate names, do not silently pick a county in another state.
+    if(!match)for(const candidate of list){
+      const detail=await apiGet('places/'+candidate.id,signal);
+      const place=detail.results?.[0];
+      if(place&&(texas(place)||(place.ancestors||[]).some(a=>a.id===18||a.name==='Texas'))){match=candidate;break}
+    }
+    if(!match)throw Error('Texas county boundary not found');
+    return match.id;
+  }
+  function cached(name){
     try{
-      if(!placeId){
-        // iNaturalist often names counties without a "Texas" suffix.
-        // Search the county name first, then prefer its explicit Texas ancestry.
-        const places=await load(endpoint+'places/autocomplete?q='+encodeURIComponent(countyName+' County'));
-        if(token!==revision)return;
-        const normalized=countyName.toLowerCase()+' county';
-        const candidates=(places.results||[]).filter(p=>String(p.name||'').trim().toLowerCase()===normalized);
-        const inTexas=p=>/texas|(?:^|,\\s*)tx(?:$|,)/i.test([p.display_name,p.name,p.place_guess].filter(Boolean).join(' '))||
-          (Array.isArray(p.ancestor_place_ids)&&p.ancestor_place_ids.includes(18));
-        const match=candidates.find(inTexas)||(candidates.length===1?candidates[0]:null);
-        if(!match){
-          output.textContent=candidates.length>1
-            ?'More than one county matched. Use Check My Area to select the Texas boundary.'
-            :'Could not locate this county in iNaturalist right now. Please try again.';
-          return;
-        }
-        placeId=match.id;
-      }
-      const input=document.getElementById('hostSearch')||document.querySelector('#heroHostSearchForm input');
-      const query=(input?.value||'').trim();
-      if(!query){output.textContent=countyName+' County selected. Search a host plant above to compare Texas-wide host relationships with county-documented butterflies and moths.';return}
-      const genus=(typeof hosts!=='undefined'&&hosts.find(h=>h.genus.toLowerCase()===query.toLowerCase())?.genus)||query.split(/\\s+/)[0];
-      const source=sourceSpeciesFor(genus);
-      if(!source){output.textContent='Texas host totals are still shown on the plant cards. A reliable species-level UDELep crosswalk for '+genus+' was not found in the quick lookup; use Check My Area for a more detailed analysis.';return}
-      const county=await countyLepidoptera(placeId,source,token);
-      if(token!==revision||!county)return;
-      output.textContent=genus+' · '+countyName+' County: '+county.count+(county.complete?'':' or more')+' UDELep-linked butterfly/moth species with Research Grade iNaturalist records here ('+(county.complete?'county result pages complete':'county result pages incomplete')+'). Texas-wide host potential remains separate on the plant cards. Local observation does not prove local host use.';
-    }catch(e){if(token===revision)output.textContent='Local comparison could not load. Texas host totals remain available; the map scanner is unchanged.'}
+      const item=JSON.parse(localStorage.getItem(cachePrefix+name)||'null');
+      return item&&item.source===stats.sourceDate&&Date.now()-item.saved<maxAge&&Array.isArray(item.ids)?item:null;
+    }catch(_){return null}
   }
-  select.addEventListener('change',()=>{countyName=select.value;placeId=null;update()});
-  const form=document.getElementById('heroHostSearchForm');
-  form?.addEventListener('submit',()=>{if(countyName)setTimeout(update,0)});
-  const input=document.getElementById('hostSearch');
-  input?.addEventListener('change',()=>{if(countyName)update()});
-  update();
+  async function loadCounty(name,token){
+    const saved=cached(name);
+    if(saved){matchedIds=new Set(saved.ids);ready=true;pending=false;paint();output.textContent=name+' County · '+saved.total+' Research Grade butterfly/moth taxa checked · cached '+new Date(saved.saved).toLocaleDateString()+'. County figures are observed UDELep-linked species, not local host-use confirmations.';return}
+    aborter=new AbortController();
+    try{
+      const signal=aborter.signal,place=await resolveCounty(name,signal);
+      if(token!==revision)return;
+      const found=new Set(),perPage=200,maxPages=75;
+      for(let page=1;page<=maxPages;page++){
+        const params=new URLSearchParams({place_id:String(place),taxon_id:'47157',quality_grade:'research',per_page:String(perPage),page:String(page)});
+        const result=await apiGet('observations/species_counts?'+params,signal);
+        if(token!==revision)return;
+        for(const item of result.results||[]){
+          const key=normalizedSpecies(item.taxon?.name);
+          if(key)for(const id of nameToRecords.get(key)||[])found.add(id);
+        }
+        output.textContent='Checking '+name+' County observations… page '+page;
+        if(page*perPage>=Number(result.total_results||0)){
+          matchedIds=found;ready=true;pending=false;
+          const saved={source:stats.sourceDate,saved:Date.now(),ids:[...found],total:Number(result.total_results||0)};
+          try{localStorage.setItem(cachePrefix+name,JSON.stringify(saved))}catch(_){}
+          output.textContent=name+' County · '+saved.total+' butterfly/moth taxa checked. Each plant now shows Texas-wide host taxa beside the matching species documented in this county. Observation does not prove feeding.';
+          paint();return;
+        }
+        if(page===maxPages)throw Error('County list exceeded complete scan limit');
+        await new Promise(resolve=>setTimeout(resolve,250));
+      }
+    }catch(error){
+      if(token!==revision||error.name==='AbortError')return;
+      ready=false;pending=false;failed=true;paint();
+      output.textContent='County counts could not be loaded completely ('+error.message+'). Texas host numbers remain valid. Try selecting the county again.';
+    }
+  }
+  select.addEventListener('change',()=>{
+    county=select.value;revision++;aborter?.abort();aborter=null;
+    matchedIds=new Set();ready=false;pending=!!county;failed=false;
+    try{localStorage.setItem('txlep-quick-county',county)}catch(_){}
+    paint();
+    if(!county){output.textContent='Showing all of Texas. Select a county to compare local observation evidence. The map and polygon tools are under Check My Area.';return}
+    output.textContent='Loading '+county+' County butterfly and moth records…';
+    loadCounty(county,revision);
+  });
+  try{const previous=localStorage.getItem('txlep-quick-county');if(counties.includes(previous))select.value=previous}catch(_){}
+  if(select.value)select.dispatchEvent(new Event('change'));else{output.textContent='Showing all of Texas. County selection updates plant counts here; it does not open a map.';paint()}
 }
