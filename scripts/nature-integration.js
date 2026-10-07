@@ -191,6 +191,7 @@ function initCountyDiscovery(){
           const key=normalizedSpecies(item.taxon?.name);
           if(key)for(const id of nameToRecords.get(key)||[])found.add(id);
         }
+        window.__countyQuickDiagnostic.lastPage={items:result.results?.slice(0,3).map(x=>x.taxon?.name),normalized:result.results?.slice(0,3).map(x=>normalizedSpecies(x.taxon?.name)),found:[...found].slice(0,6),totalFound:found.size};
         output.textContent='Checking '+name+' County observations… page '+page;
         if(page*perPage>=Number(result.total_results||0)){
           // Hays has extensive known Lepidoptera/UDELep overlap. An empty match
