@@ -1,6 +1,5 @@
-const CACHE_VERSION = 'txlep-pwa-nature-v8-20261007';
+const CACHE_VERSION = 'txlep-pwa-nature-v9-20261007';
 const CORE_ASSETS = [
-  './',
   './index.html',
   './scripts/nature-garden.css',
   './scripts/nature-integration.js',
@@ -20,10 +19,15 @@ const CORE_ASSETS = [
 ];
 
 self.addEventListener('install', event => {
+  // A single temporary failure must not trap iOS users on the old worker.
+  // Keep offline assets best-effort and start serving fresh JS as soon as
+  // the new worker activates.
   event.waitUntil(
     caches.open(CACHE_VERSION)
-      .then(cache => cache.addAll(CORE_ASSETS))
-      .then(() => self.skipWaiting())
+      .then(async cache => {
+        await Promise.allSettled(CORE_ASSETS.map(asset => cache.add(asset)));
+        await self.skipWaiting();
+      })
   );
 });
 
