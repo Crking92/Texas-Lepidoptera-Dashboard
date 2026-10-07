@@ -26,18 +26,20 @@ async function main(){
  const first=await req(p+'1');
  console.log('Hays butterfly/moth species_count total_results:',first.total_results);
  console.log('iNat sample:',(first.results||[]).slice(0,7).map(x=>x.taxon?.name));
- const oakNames=new Set(oak.map(r=>r.species?.trim().toLowerCase()).filter(Boolean));
+ const normalize=name=>{const m=String(name||'').trim().match(/^([A-Z][a-z-]+)\s+([a-z][a-z-]+)/);return m?(m[1]+' '+m[2]).toLowerCase():null};
+ const oakNames=new Set(oak.map(r=>normalize(r.species)).filter(Boolean));
+ console.log('Normalized UDELep oak sample:',[...oakNames].slice(0,8));
  const matched=[],allSpecies=new Set();
  const number=Math.min(75,Math.ceil((first.total_results||0)/200));
  for(let i=1;i<=number;i++){
   const page=i===1?first:await req(p+i);
   for(const item of page.results||[]){
-    const name=item.taxon?.name?.toLowerCase();if(!name)continue;allSpecies.add(name);
+    const name=normalize(item.taxon?.name);if(!name)continue;allSpecies.add(name);
     if(oakNames.has(name))matched.push(name);
   }
   if(i%10===0)console.log('Scanned pages',i,'match count',matched.length);
  }
- console.log('FINAL: observed species',allSpecies.size,'Quercus direct scientific matches',matched.length,'examples',matched.slice(0,30));
+ console.log('FINAL: observed species',allSpecies.size,'Quercus NORMALIZED binomial matches',matched.length,'examples',matched.slice(0,30));
  if(!first.total_results)throw Error('Hays returned 0 Lepidoptera species. API/place filter issue');
 }
 main().catch(e=>{console.error('DIAGNOSTIC FAILED:',e.stack||e);process.exitCode=1});
