@@ -216,6 +216,24 @@ function initCombinedSortAndBeeCredit(){
     sorter.append(option);
   }
   // Credit is visible on the main plant explorer, not buried inside the bee tab.
+  // The original host renderer lives in the embedded page. Wrap that live
+  // renderer so changes to sorting and subsequent searches use the same rules.
+  if(!window.__combinedHostSortInstalled && typeof renderHosts==='function'){
+    const previousRenderHosts=renderHosts;
+    renderHosts=function(...args){
+      const result=previousRenderHosts(...args);
+      if(sorter.value==='both' && typeof state!=='undefined' && typeof renderHostCards==='function'){
+        const beeN=genus=>new Set((BEE_HOST_INDEX[genus]||[]).map(b=>b.name)).size;
+        state.filteredHosts.sort((a,b)=>(b.establishedCount*beeN(b.genus))-(a.establishedCount*beeN(a.genus))||
+          beeN(b.genus)-beeN(a.genus)||
+          b.establishedCount-a.establishedCount||
+          a.genus.localeCompare(b.genus));
+        renderHostCards();
+      }
+      return result;
+    };
+    window.__combinedHostSortInstalled=true;
+  }
   if(document.getElementById('beeSourceMainCredit'))return;
   const source=document.createElement('p');
   source.id='beeSourceMainCredit';
