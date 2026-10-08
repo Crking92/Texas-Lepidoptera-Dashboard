@@ -157,3 +157,30 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
  #hostGrid .host-count-pair .host-county-metric strong,
  #hostGrid .host-count-pair .host-bee-metric strong{font-size:1.42rem}
 }
+
+/* Source attribution and optional discovery ranking on the main plant explorer. */
+.bee-source-main-credit,.joint-sort-explanation{
+  font-size:.8rem;
+  line-height:1.55;
+  max-width:75ch;
+  margin:10px 0;
+  color:var(--muted);
+}
+.bee-source-main-credit a{
+  color:var(--accent);
+  text-decoration:underline;
+  text-decoration-thickness:1px;
+  text-underline-offset:3px;
+  font-weight:650;
+}
+.bee-source-main-credit a:hover,.bee-source-main-credit a:focus-visible{
+  text-decoration-thickness:2px;
+}
+.joint-sort-explanation{
+  padding:12px 15px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--leafwash);
+  color:var(--ink);
+}
+.joint-sort-explanation[hidden]{display:none!important}
