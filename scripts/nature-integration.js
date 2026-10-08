@@ -207,7 +207,38 @@ function initBeePlantVisibility(){
   renderBeeOnlyMatches();
   paint();
 }
+function initCombinedSortAndBeeCredit(){
+  const sorter=document.getElementById('hostSort'),results=document.getElementById('hostResultsPanel');
+  if(!sorter||!results)return;
+  if(!sorter.querySelector('option[value="both"]')){
+    const option=document.createElement('option');
+    option.value='both';option.textContent='Strongest for both 🦋🐝';
+    sorter.append(option);
+  }
+  // Credit is visible on the main plant explorer, not buried inside the bee tab.
+  if(document.getElementById('beeSourceMainCredit'))return;
+  const source=document.createElement('p');
+  source.id='beeSourceMainCredit';
+  source.className='bee-source-main-credit';
+  source.append('🐝 Specialist-bee relationships adapted from ');
+  const link=document.createElement('a');
+  link.href='https://jarrodfowler.com/bees_pollen.html';
+  link.target='_blank';link.rel='noopener noreferrer';
+  link.textContent='Jarrod Fowler (2020), Pollen Specialist Bees of the Central United States ↗';
+  source.append(link,'. Bees are Texas-listed in that source; these are not Hays County sightings.');
+  const note=document.createElement('p');
+  note.id='jointSortExplanation';
+  note.className='joint-sort-explanation';
+  note.hidden=true;
+  note.textContent='Strongest for both ranks plant genera by Texas-range caterpillar-host taxa × Texas-listed specialist-bee species. This helps find overlap between datasets, but is not a planting-value score or a claim that every species in the genus hosts every insect.';
+  const update=()=>{note.hidden=sorter.value!=='both'};
+  sorter.addEventListener('change',update);
+  update();
+  results.prepend(note);
+  results.prepend(source);
+}
 function initNatureIntegration(){
+initCombinedSortAndBeeCredit();
 initCountyDiscovery();
 initBeePlantVisibility();
 const beeFrame=document.getElementById('beeExplorer');beeFrame.addEventListener('load',syncBeeTheme);
