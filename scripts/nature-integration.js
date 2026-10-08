@@ -63,14 +63,40 @@ function initBeePlantVisibility(){
     document.querySelectorAll('#hostGrid .host-card').forEach(card=>{
       const genus=card.querySelector('.garden-toggle[data-genus]')?.dataset.genus||
                   card.querySelector('.host-name')?.textContent?.trim();
-      if(!genus||card.querySelector('.bee-pollen-metric'))return;
-      const anchor=card.querySelector('.host-card-top');
-      if(!anchor)return;
-      const metric=beeCountElement(genus,'bee-pollen-strip');
-      anchor.after(metric);
-      if(supported(genus)&&![...card.querySelectorAll('button')].some(button=>/bee connections|meet the bees/i.test(button.textContent||''))){
-        const actions=card.querySelector('.host-card-actions');
-        actions?.append(beeAction(genus));
+      if(!genus)return;
+      const original=card.querySelector('.host-count'),copy=original?.parentElement;
+      if(!original||!copy)return;
+      let row=card.querySelector('.host-count-pair');
+      if(!row){
+        const label=original.nextElementSibling?.classList.contains('microcopy')?original.nextElementSibling:null;
+        row=document.createElement('div');row.className='host-count-pair';
+        const statewide=document.createElement('div');statewide.className='host-texas-metric';
+        original.before(row);statewide.append(original);
+        if(label){label.title=label.textContent;label.textContent='TX butterfly + moth hosts';statewide.append(label)}
+        row.append(statewide);
+      }else{
+        const label=row.querySelector('.host-texas-metric .microcopy');
+        if(label){label.title='Texas-range butterfly and moth taxa linked to this plant genus in UDELep';label.textContent='TX butterfly + moth hosts'}
+      }
+      if(!row.querySelector('.host-bee-metric')){
+        const metric=document.createElement('div'),number=document.createElement('strong'),label=document.createElement('span');
+        metric.className='host-bee-metric bee-pollen-metric';
+        metric.title=infoText;
+        const count=beePollenConnectionCount(genus);
+        number.textContent=count?fmt.format(count):'—';
+        label.className='bee-pollen-label';
+        label.textContent=count?'Specialist bees':'Not listed';
+        metric.setAttribute('aria-label',count?count+' Texas-listed pollen-specialist bees linked to '+genus:'No specialist bees listed for '+genus+' in the current source');
+        metric.append(number,label);
+        row.append(metric);
+      }
+      // The separate number button duplicates this column. Keep its click
+      // handler so users can still open the full bee explorer.
+      const buttons=[...card.querySelectorAll('.host-card-actions button')];
+      const existing=buttons.find(button=>/^\\d+ bee connections$/i.test(button.textContent.trim()));
+      if(existing){existing.textContent='Meet the bees →';existing.title=infoText}
+      if(supported(genus)&&!buttons.some(button=>/bee connections|meet the bees/i.test(button.textContent||''))){
+        card.querySelector('.host-card-actions')?.append(beeAction(genus));
       }
     });
   }
@@ -248,23 +274,26 @@ function initCountyDiscovery(){
     grid.querySelectorAll('.host-card').forEach(card=>{
       const genus=card.querySelector('.garden-toggle[data-genus]')?.dataset.genus||card.querySelector('.host-name')?.textContent?.trim();
       const original=card.querySelector('.host-count');if(!genus||!original)return;
-      let pair=card.querySelector('.host-count-pair');
-      if(!county){
-        if(pair){const texas=pair.querySelector('.host-texas-metric');if(texas)pair.replaceWith(...texas.childNodes)}
-        return;
+      let row=card.querySelector('.host-count-pair');
+      if(!row&&!county)return; // Bee layout creates the statewide + bee row.
+      if(!row){
+        const oldLabel=original.nextElementSibling?.classList.contains('microcopy')?original.nextElementSibling:null;
+        row=document.createElement('div');row.className='host-count-pair';
+        const statewide=document.createElement('div');statewide.className='host-texas-metric';
+        original.before(row);statewide.append(original);if(oldLabel)statewide.append(oldLabel);
+        row.append(statewide);
       }
-      if(!pair){
-        const formerLabel=original.nextElementSibling?.classList.contains('microcopy')?original.nextElementSibling:null;
-        pair=document.createElement('div');pair.className='host-count-pair';
-        const texas=document.createElement('div');texas.className='host-texas-metric';
-        original.before(pair);texas.append(original);if(formerLabel)texas.append(formerLabel);
-        const local=document.createElement('div');local.className='host-county-metric';
+      row.classList.toggle('has-county',Boolean(county));
+      let local=row.querySelector('.host-county-metric');
+      if(!county){local?.remove();return}
+      if(!local){
+        local=document.createElement('div');local.className='host-county-metric';
         local.append(document.createElement('strong'),document.createElement('span'));
-        pair.append(texas,local);
+        row.insertBefore(local,row.querySelector('.host-bee-metric'));
       }
-      const local=pair.querySelector('.host-county-metric');
       local.querySelector('strong').textContent=ready?fmt.format(countFor(genus)):pending?'…':'—';
-      local.querySelector('span').textContent=county+' County observed';
+      local.querySelector('span').textContent=county+' Co. observed';
+      local.title='UDELep-linked butterflies and moths with Research Grade iNaturalist records in '+county+' County; this does not verify caterpillar feeding there.';
     });
   }
   function paintOtherCards(){
