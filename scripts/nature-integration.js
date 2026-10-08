@@ -22,8 +22,168 @@ function renderCompareBeeConnections(names){
   box.textContent=names.length?`Bee pollen connections: ${union.size} different bees across these plant groups · ${shared} shared by every group. Caterpillar-host results below use UDELep separately.`:'Choose plant groups to compare their caterpillar hosts and bee pollen connections.';
 }
 function syncBeeTheme(){const frame=document.getElementById('beeExplorer');if(frame.contentDocument?.body)frame.contentDocument.body.classList.toggle('dark',document.documentElement.dataset.theme==='dark')}
+
+/* Plant-first bee discovery: separate Fowler pollen-specialist counts from
+   Texas UDELep caterpillar hosts and iNaturalist county occurrences. */
+function beePollenConnectionCount(genus){
+  return new Set((BEE_HOST_INDEX[genus]||[]).map(item=>item.name)).size;
+}
+function initBeePlantVisibility(){
+  const infoText='Source: Fowler pollen-specialist bee relationships for bees listed in Texas. These are not Hays County sightings or proof of local pollen collection.';
+  const supported=genus=>beePollenConnectionCount(genus)>0;
+  const details=(genus,event)=>{
+    event?.stopPropagation();
+    openBeePlant(genus);
+  };
+  function beeCountElement(genus,kind){
+    const count=beePollenConnectionCount(genus),el=document.createElement('div');
+    el.className='bee-pollen-metric '+kind;
+    el.dataset.beeGenus=genus;
+    el.title=infoText;
+    const label=document.createElement('span');label.className='bee-pollen-label';
+    if(count){
+      const amount=document.createElement('strong');amount.textContent='🐝 '+count;
+      label.textContent=' TX-listed pollen-specialist '+(count===1?'bee':'bees');
+      el.append(amount,label);
+    }else{
+      label.textContent='🐝 No specialist-bee relationship listed in this source';
+      el.classList.add('bee-pollen-unlisted');el.append(label);
+    }
+    return el;
+  }
+  function beeAction(genus){
+    const button=document.createElement('button');
+    button.type='button';button.className='button small bee-connection-action';
+    button.textContent='Meet the bees →';
+    button.title=infoText;
+    button.addEventListener('click',event=>details(genus,event));
+    return button;
+  }
+  function decorateHostCards(){
+    document.querySelectorAll('#hostGrid .host-card').forEach(card=>{
+      const genus=card.querySelector('.garden-toggle[data-genus]')?.dataset.genus||
+                  card.querySelector('.host-name')?.textContent?.trim();
+      if(!genus||card.querySelector('.bee-pollen-metric'))return;
+      const anchor=card.querySelector('.host-card-top');
+      if(!anchor)return;
+      const metric=beeCountElement(genus,'bee-pollen-strip');
+      anchor.after(metric);
+      if(supported(genus)&&![...card.querySelectorAll('button')].some(button=>/bee connections|meet the bees/i.test(button.textContent||''))){
+        const actions=card.querySelector('.host-card-actions');
+        actions?.append(beeAction(genus));
+      }
+    });
+  }
+  function decorateFeatured(){
+    document.querySelectorAll('#featuredNativeGrid .featured-native-card').forEach(card=>{
+      const genus=card.querySelector('.featured-native-name')?.textContent?.trim();
+      if(!genus||card.querySelector('.bee-pollen-metric'))return;
+      const metric=beeCountElement(genus,'bee-featured-metric');
+      card.querySelector('.featured-native-stats')?.after(metric);
+      if(supported(genus))card.querySelector('.featured-native-actions')?.append(beeAction(genus));
+    });
+  }
+  function decorateCollections(){
+    document.querySelectorAll('.collection-card,.compare-card').forEach(card=>{
+      const genus=card.querySelector('.collection-name')?.textContent?.trim();
+      if(!genus||card.querySelector('.bee-pollen-metric'))return;
+      const metrics=card.querySelector('.collection-metrics');
+      if(!metrics)return;
+      metrics.append(beeCountElement(genus,'bee-collection-metric'));
+      if(supported(genus))card.querySelector('.collection-actions')?.append(beeAction(genus));
+    });
+  }
+  function decorateSpotlights(){
+    ['hostPlantSpotlight','plantSpotlight'].forEach(id=>{
+      const target=document.getElementById(id),genus=target?.dataset.genus;
+      if(!target||!genus||!target.querySelector('.spotlight-head')||target.querySelector('.bee-pollen-metric'))return;
+      const copy=target.querySelector('.spotlight-head>div');
+      if(!copy)return;
+      const count=beePollenConnectionCount(genus),extra=document.createElement('p');
+      extra.className='bee-spotlight-note';
+      extra.textContent=count?
+        '🐝 '+count+' Texas-listed pollen-specialist '+(count===1?'bee is':'bees are')+' linked to '+genus+' in Fowler’s source (not county sightings).':
+        '🐝 No pollen-specialist bee relationship is listed for this genus in the current source; this is not a measure of all bee visits.';
+      extra.title=infoText;extra.classList.add('bee-pollen-metric');copy.append(extra);
+      if(count)target.querySelector('.spotlight-actions')?.append(beeAction(genus));
+    });
+  }
+  function decorateCompareTable(){
+    const wrap=document.getElementById('compareTableWrap'),table=wrap?.querySelector('table');
+    if(!table||table.querySelector('.bee-pollen-table-row'))return;
+    const cells=[...table.querySelectorAll('thead th')].slice(1),row=document.createElement('tr');
+    row.className='bee-pollen-table-row';
+    const first=document.createElement('td');first.textContent='🐝 TX-listed pollen-specialist bees';first.title=infoText;row.append(first);
+    cells.forEach(cell=>{
+      const genus=cell.textContent.trim(),amount=document.createElement('td');
+      const n=beePollenConnectionCount(genus);
+      amount.textContent=n?String(n):'Not listed';
+      row.append(amount);
+    });
+    table.querySelector('tbody')?.append(row);
+  }
+  // Plants appearing in the bee dataset but not in UDELep should still be
+  // findable from the main plant search instead of disappearing altogether.
+  const hostResults=document.getElementById('hostResultsPanel'),search=document.getElementById('hostSearch');
+  let beeOnlyPanel=null;
+  if(hostResults&&search){
+    beeOnlyPanel=document.createElement('section');
+    beeOnlyPanel.id='beeOnlyPlantMatches';beeOnlyPanel.className='bee-only-matches';beeOnlyPanel.hidden=true;
+    beeOnlyPanel.setAttribute('aria-label','Additional pollen-specialist plant results');
+    hostResults.insertAdjacentElement('afterend',beeOnlyPanel);
+  }
+  function renderBeeOnlyMatches(){
+    if(!beeOnlyPanel||!search)return;
+    const query=search.value.toLowerCase().trim();
+    beeOnlyPanel.replaceChildren();
+    if(query.length<2){beeOnlyPanel.hidden=true;return}
+    const matched=Object.keys(BEE_HOST_INDEX).filter(genus=>
+      !hosts.some(h=>h.genus===genus)&&
+      (genus.toLowerCase().includes(query)||(POPULAR_HOST_NAMES[genus]||'').toLowerCase().includes(query))
+    ).sort((a,b)=>beePollenConnectionCount(b)-beePollenConnectionCount(a)).slice(0,12);
+    beeOnlyPanel.hidden=!matched.length;
+    if(!matched.length)return;
+    const heading=document.createElement('h3');heading.textContent='More plants with bee pollen connections';
+    const explanation=document.createElement('p');explanation.className='microcopy';
+    explanation.textContent='These plants have bee relationships in Fowler’s source but no matching Texas UDELep caterpillar-host genus in this dashboard. They are not zero-value plants.';
+    const grid=document.createElement('div');grid.className='bee-only-grid';
+    matched.forEach(genus=>{
+      const card=document.createElement('article');card.className='bee-only-card';
+      const title=document.createElement('strong');title.textContent=genus;
+      const label=document.createElement('span');label.textContent='🐝 '+beePollenConnectionCount(genus)+' specialist bees';
+      card.append(title,label,beeAction(genus));grid.append(card);
+    });
+    beeOnlyPanel.append(heading,explanation,grid);
+  }
+  let scheduled=false;
+  function paint(){
+    if(scheduled)return;
+    scheduled=true;
+    queueMicrotask(()=>{
+      scheduled=false;
+      decorateHostCards();
+      decorateFeatured();
+      decorateCollections();
+      decorateSpotlights();
+      decorateCompareTable();
+    });
+  }
+  ['hostGrid','featuredNativeGrid','gardenGrid','gardenRecommendations','compareGrid',
+   'compareTableWrap','hostPlantSpotlight','plantSpotlight'].forEach(id=>{
+    const root=document.getElementById(id);
+    if(root)new MutationObserver(paint).observe(root,{childList:true});
+  });
+  // Input and submit both update supplementary bee-only plant search results.
+  if(search){
+    search.addEventListener('input',()=>queueMicrotask(renderBeeOnlyMatches));
+    document.getElementById('heroHostSearchForm')?.addEventListener('submit',()=>queueMicrotask(renderBeeOnlyMatches));
+  }
+  renderBeeOnlyMatches();
+  paint();
+}
 function initNatureIntegration(){
 initCountyDiscovery();
+initBeePlantVisibility();
 const beeFrame=document.getElementById('beeExplorer');beeFrame.addEventListener('load',syncBeeTheme);
 document.getElementById('themeToggle').addEventListener('click',syncBeeTheme);
 window.addEventListener('storage',event=>{if(event.key==='txlep-garden'){gardenPlants.clear();readStoredArray('txlep-garden').forEach(g=>gardenPlants.add(g));renderGarden();renderComparison()}});
