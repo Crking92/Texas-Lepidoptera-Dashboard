@@ -241,7 +241,32 @@ function renderHostKpis(){
   const top=hosts[0];const data=[['Plant groups',fmt.format(hosts.length),'Searchable host genera'],['Most-linked plant',top?top.genus:'—',top?fmt.format(top.establishedCount)+' Texas-range taxa':''],['Texas-range taxa',fmt.format(stats.established),'Statewide source range'],['Occasional visitors',fmt.format(stats.strayOnly),'Kept separate']];
   $('hostKpis').replaceChildren(...data.map(([a,b,c])=>{const x=node('div','kpi');x.append(node('div','kpi-label',a),node('div','kpi-value',b),node('div','kpi-note',c));return x}))
 }
-function renderHosts(){const query=$('hostSearch').value.trim(),ranked=query?rankHostMatches(query):HOST_SEARCH_INDEX.map(item=>({...item,score:0}));state.filteredHosts=ranked.map(item=>item.host);if(!query){if($('hostSort').value==='alpha')state.filteredHosts.sort((a,b)=>a.genus.localeCompare(b.genus));else state.filteredHosts.sort((a,b)=>b.establishedCount-a.establishedCount||b.totalCount-a.totalCount||a.genus.localeCompare(b.genus))}if(state.hostPage>hostPageCount())state.hostPage=Math.max(1,hostPageCount());renderHostCards();renderPlantSpotlight('hostPlantSpotlight',exactHostName(query));syncHostSearchUI()}
+// Optional discovery ranking: an exploratory sorting heuristic, not an ecological score.
+function specialistBeeCountForSort(genus){
+  if(typeof BEE_HOST_INDEX==='undefined')return 0;
+  return new Set((BEE_HOST_INDEX[genus]||[]).map(bee=>bee.name)).size;
+}
+function combinedHostSortValue(host){
+  return host.establishedCount*specialistBeeCountForSort(host.genus);
+}
+function renderHosts(){
+  const query=$('hostSearch').value.trim(),ranked=query?rankHostMatches(query):HOST_SEARCH_INDEX.map(item=>({...item,score:0}));
+  state.filteredHosts=ranked.map(item=>item.host);
+  const selected=$('hostSort').value;
+  if(selected==='both'){
+    // A plant must have relationships in both datasets to lead this ranking.
+    state.filteredHosts.sort((a,b)=>combinedHostSortValue(b)-combinedHostSortValue(a)||
+      specialistBeeCountForSort(b.genus)-specialistBeeCountForSort(a.genus)||
+      b.establishedCount-a.establishedCount||a.genus.localeCompare(b.genus));
+  }else if(!query){
+    if(selected==='alpha')state.filteredHosts.sort((a,b)=>a.genus.localeCompare(b.genus));
+    else state.filteredHosts.sort((a,b)=>b.establishedCount-a.establishedCount||b.totalCount-a.totalCount||a.genus.localeCompare(b.genus));
+  }
+  if(state.hostPage>hostPageCount())state.hostPage=Math.max(1,hostPageCount());
+  renderHostCards();
+  renderPlantSpotlight('hostPlantSpotlight',exactHostName(query));
+  syncHostSearchUI();
+}
 function hostPageCount(){return Math.max(1,Math.ceil(state.filteredHosts.length/state.hostPageSize))}
 function renderHostCards(){
   const start=(state.hostPage-1)*state.hostPageSize,end=Math.min(start+state.hostPageSize,state.filteredHosts.length),grid=$('hostGrid');grid.replaceChildren();
