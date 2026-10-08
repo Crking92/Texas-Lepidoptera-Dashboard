@@ -1,0 +1,19 @@
+name: Plant overlap ranking (UDELep and bees)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/plant-overlap-ranking.cjs'
+      - '.github/workflows/plant-overlap-ranking.yml'
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rank Texas host plant genera across Lepidoptera and specialist bees
+        run: node tests/plant-overlap-ranking.cjs
