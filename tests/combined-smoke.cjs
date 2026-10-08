@@ -6,7 +6,7 @@ assert.equal(await page.locator('#beeSourceMainCredit a').getAttribute('href'),'
 assert.equal(await page.locator('#jointSortExplanation').isHidden(),true);
 await page.locator('#hostSort').selectOption('both');
 assert.equal(await page.locator('#jointSortExplanation').isVisible(),true);
-const combinedOrder=await page.locator('#hostGrid .host-card .garden-toggle[data-genus]').evaluateAll(els=>els.slice(0,4).map(el=>el.dataset.genus));
+console.log('SORT DEBUG',await page.evaluate(()=>({value:document.getElementById('hostSort').value,known:typeof combinedHostSortValue,top:state.filteredHosts.slice(0,4).map(x=>x.genus),bees:typeof BEE_HOST_INDEX,hasHelianthus:typeof BEE_HOST_INDEX!=='undefined'?BEE_HOST_INDEX.Helianthus?.length:null})));const combinedOrder=await page.locator('#hostGrid .host-card .garden-toggle[data-genus]').evaluateAll(els=>els.slice(0,4).map(el=>el.dataset.genus));
 assert.deepEqual(combinedOrder.slice(0,3),['Helianthus','Solidago','Salix'],'Joint sort must rank from source-based Lepidoptera x specialist-bee counts');
 assert.equal(await page.locator('#hostGrid .host-card .host-bee-metric strong').first().innerText(),'72','Leading genus has linked specialist bees');
 await page.locator('#hostSort').selectOption('alpha');
