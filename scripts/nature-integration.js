@@ -85,7 +85,7 @@ function initBeePlantVisibility(){
         const count=beePollenConnectionCount(genus);
         number.textContent=count?fmt.format(count):'—';
         label.className='bee-pollen-label';
-        label.textContent=count?'Specialist bees':'Not listed';
+        label.textContent=count?'TX specialist bees':'No bees listed';
         metric.setAttribute('aria-label',count?count+' Texas-listed pollen-specialist bees linked to '+genus:'No specialist bees listed for '+genus+' in the current source');
         metric.append(number,label);
         row.append(metric);
