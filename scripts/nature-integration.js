@@ -93,7 +93,7 @@ function initBeePlantVisibility(){
       // The separate number button duplicates this column. Keep its click
       // handler so users can still open the full bee explorer.
       const buttons=[...card.querySelectorAll('.host-card-actions button')];
-      const existing=buttons.find(button=>/^\\d+ bee connections$/i.test(button.textContent.trim()));
+      const existing=buttons.find(button=>/^\d+ bee connections$/i.test(button.textContent.trim()));
       if(existing){existing.textContent='Meet the bees →';existing.title=infoText}
       if(supported(genus)&&!buttons.some(button=>/bee connections|meet the bees/i.test(button.textContent||''))){
         card.querySelector('.host-card-actions')?.append(beeAction(genus));
