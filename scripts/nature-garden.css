@@ -272,3 +272,172 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
   line-height:1.25;
   margin-bottom:4px;
 }
+
+/* Tiny, photo-led discovery tiles. The scientific layers live in each story. */
+.garden-first-featured .featured-native-grid{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  column-gap:12px;
+  row-gap:12px;
+  padding:12px 2px 8px;
+  margin:0;
+  overflow:visible;
+  scroll-snap-type:none;
+}
+.garden-first-featured .featured-native-grid .featured-native-card{
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  min-width:0;
+  max-width:none;
+  width:auto;
+  height:auto;
+  margin:0;
+  padding:0;
+  flex:initial;
+  scroll-snap-align:none;
+  overflow:hidden;
+  cursor:pointer;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:17px;
+  box-shadow:none;
+  isolation:isolate;
+}
+.garden-first-featured .featured-native-card:is(:hover,:focus-visible){
+  transform:translateY(-2px);
+  border-color:var(--accent);
+  box-shadow:var(--shadow);
+}
+.garden-first-featured .featured-native-card:focus-visible{
+  outline:3px solid var(--accent-2);
+  outline-offset:3px;
+}
+.garden-first-featured .featured-native-top{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  padding:0;
+  margin:0;
+  gap:0;
+  height:100%;
+  min-width:0;
+}
+.garden-first-featured .featured-native-top>.taxon-thumb{
+  width:100%;
+  height:auto;
+  aspect-ratio:1.18 / 1;
+  min-height:0;
+  max-height:none;
+  flex:none;
+  border:0;
+  border-radius:0;
+  background:var(--leafwash);
+}
+.garden-first-featured .featured-native-top>.taxon-thumb img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.garden-first-featured .featured-native-top>div:not(.taxon-thumb){
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-width:0;
+  flex:1 1 auto;
+  padding:9px 10px 25px;
+  margin:0;
+  gap:2px;
+  text-align:left;
+}
+.garden-first-featured .featured-native-top .featured-native-common{
+  order:0;
+  font-family:Georgia,serif;
+  font-size:clamp(.82rem,1.23vw,1.06rem);
+  font-weight:650;
+  line-height:1.12;
+  color:var(--ink);
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.garden-first-featured .featured-native-top .featured-native-name{
+  order:1;
+  font-size:.67rem;
+  font-weight:500;
+  font-style:italic;
+  line-height:1.22;
+  color:var(--muted);
+  overflow-wrap:anywhere;
+}
+.garden-first-featured .featured-native-card::after{
+  content:'Explore ↗';
+  position:absolute;
+  bottom:8px;
+  left:10px;
+  font-size:.6rem;
+  font-weight:780;
+  letter-spacing:.015em;
+  color:var(--accent);
+  pointer-events:none;
+}
+.garden-first-featured .featured-native-kicker,
+.garden-first-featured .featured-native-note,
+.garden-first-featured .featured-native-stats,
+.garden-first-featured .bee-featured-metric,
+.garden-first-featured .featured-native-actions,
+.garden-first-featured .native-status-wrap{
+  display:none !important;
+}
+@media(max-width:1050px){
+  .garden-first-featured .featured-native-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+@media(max-width:780px){
+  .garden-first-featured .featured-native-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:650px){
+  .garden-first-featured .featured-native-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:9px;
+    padding:8px 0;
+    overflow:visible;
+    scroll-snap-type:none;
+  }
+  .garden-first-featured .featured-native-grid .featured-native-card{
+    min-width:0;
+    max-width:none;
+    flex:initial;
+    width:auto;
+    scroll-snap-align:none;
+    border-radius:14px;
+  }
+  .garden-first-featured .featured-native-top>.taxon-thumb{
+    aspect-ratio:1.10 / 1;
+    height:auto;
+  }
+  .garden-first-featured .featured-native-top>div:not(.taxon-thumb){
+    padding:8px 7px 23px;
+  }
+  .garden-first-featured .featured-native-top .featured-native-common{
+    font-size:.78rem;
+    line-height:1.15;
+  }
+  .garden-first-featured .featured-native-top .featured-native-name{
+    font-size:.62rem;
+  }
+  .garden-first-featured .featured-native-card::after{
+    font-size:.56rem;
+    left:7px;
+    bottom:7px;
+  }
+}
+@media(max-width:365px){
+  .garden-first-featured .featured-native-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .garden-first-featured .featured-native-top .featured-native-common{font-size:.88rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .garden-first-featured .featured-native-card{transition:none}
+}
