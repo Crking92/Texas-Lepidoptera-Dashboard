@@ -90,6 +90,8 @@ await page.locator('#gardenMoreTools summary').click();
 await page.locator('#gardenMoreTools [data-open-master]').click();
 assert.equal(await page.locator('#plantMasterListPanel').evaluate(el=>el.open),true,'More tools can reopen master list');
 await page.locator('#plantMasterListPanel').evaluate(el=>el.open=false);
+await page.locator('#hostSearch').fill('');
+await page.evaluate(()=>{state.hostPage=1;renderHosts()});
 await page.locator('#gardenAllPlantsDetails').evaluate(el=>el.open=true);
 await page.locator('#hostGrid .host-card').first().waitFor();
 assert.equal(await page.locator('#hostGrid .host-card').first().locator('.garden-toggle').getAttribute('data-genus'),'Quercus','Expected top Lepidoptera genus is oak');
