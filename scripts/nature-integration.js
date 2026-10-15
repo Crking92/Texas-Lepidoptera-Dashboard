@@ -510,7 +510,9 @@ function initCuriosityFirst(){
     const bees=beePollenConnectionCount(genus);
     metric(bees?'🐝 '+fmt.format(bees):'—',bees?'TX specialist bees':'Specialist bees not listed',
       'Jarrod Fowler Texas-listed pollen specialists. Not listed does not mean no bees visit','garden-story-bees-count');
-    head.after(stats);
+    const gallery=spotlight.querySelector('.plant-gallery');
+    if(gallery){head.after(gallery);gallery.after(stats)}
+    else head.after(stats);
 
     const storyActions=document.createElement('div');storyActions.className='garden-story-primary-actions';
     const insectButton=document.createElement('button');insectButton.type='button';
