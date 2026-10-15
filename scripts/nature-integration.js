@@ -401,16 +401,37 @@ function initCuriosityFirst(){
       if(genus){
         tile.dataset.featuredGenus=genus;
         const lepCount=hosts.find(host=>host.genus===genus)?.establishedCount;
+        const beeCount=beePollenConnectionCount(genus);
         tile.setAttribute('aria-label','Explore '+(common||genus)+' ('+genus+')'+
-          (Number.isFinite(lepCount)?', '+fmt.format(lepCount)+' Texas-range butterfly and moth taxa linked to this plant genus':''));
+          (Number.isFinite(lepCount)?', '+fmt.format(lepCount)+' Texas-range butterfly and moth taxa linked to this plant genus':'')+
+          (beeCount?', '+fmt.format(beeCount)+' Texas-listed pollen-specialist bee relationships':', specialist-bee data not listed'));
         tile.title='Open the plant story for '+(common||genus);
-        if(Number.isFinite(lepCount)&&!tile.querySelector('.featured-lep-count')){
-          const badge=document.createElement('span');
-          badge.className='featured-lep-count';
-          badge.textContent='🦋 '+fmt.format(lepCount);
-          badge.title=fmt.format(lepCount)+' Texas-range butterfly and moth taxa linked to '+genus+' in the source';
-          badge.setAttribute('aria-hidden','true'); // Count is also read in the accessible tile label.
-          tile.append(badge);
+        let stack=tile.querySelector('.featured-wildlife-counts');
+        if(!stack){
+          stack=document.createElement('div');
+          stack.className='featured-wildlife-counts';
+          stack.setAttribute('aria-hidden','true'); // Tile label contains both counts and data qualifications.
+          tile.append(stack);
+        }
+        if(Number.isFinite(lepCount)){
+          let lep=tile.querySelector('.featured-lep-count');
+          if(!lep){
+            lep=document.createElement('span');
+            lep.className='featured-lep-count';
+            lep.textContent='🦋 '+fmt.format(lepCount);
+            lep.title=fmt.format(lepCount)+' Texas-range butterfly and moth taxa linked to '+genus+' in UDELep';
+          }
+          stack.append(lep);
+        }
+        if(!stack.querySelector('.featured-bee-count')){
+          const bee=document.createElement('span');
+          bee.className='featured-bee-count';
+          if(!beeCount)bee.classList.add('bee-data-unlisted');
+          bee.textContent='🐝 '+(beeCount?fmt.format(beeCount):'—');
+          bee.title=beeCount
+            ?fmt.format(beeCount)+' Texas-listed pollen-specialist bee species linked to '+genus+' in Fowler’s dataset; not county sightings'
+            :'Specialist-bee relationship not listed in Fowler’s Texas bee dataset. This does not mean the plant has no bees.';
+          stack.append(bee);
         }
       }
       const kicker=tile.querySelector('.featured-native-kicker');
