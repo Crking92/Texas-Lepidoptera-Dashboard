@@ -43,6 +43,53 @@ assert(tileCounts.every(tile=>tile.stackDirection==='column'&&tile.badgeOrder[0]
 assert.equal(tileCounts.find(tile=>tile.genus==='Helianthus')?.bee,'🐝 72','Sunflower uses its confirmed specialist bee count');
 assert.equal(tileCounts.find(tile=>tile.genus==='Quercus')?.bee,'🐝 —','Oak is not misrepresented as zero bees');
 assert.equal(await page.locator('#featuredNativeGrid .featured-native-card').first().evaluate(tile=>getComputedStyle(tile,'::after').content),'none','No extra Explore text on the small tiles');
+// Full master index: union of UDELep host genera and Jarrod Fowler's bee-linked genera.
+assert.equal(await page.locator('#plantMasterListPanel').count(),1,'Separate A–Z plant master list exists');
+assert.equal(await page.locator('#plantMasterListPanel').evaluate(el=>el.open),false,'A–Z index starts folded to preserve photo-first homepage');
+assert.equal(await page.locator('.garden-first-featured .plant-master-shortcut').count(),1,'Photo gallery links directly to master list');
+assert.equal(await page.locator('#gardenMoreTools [data-open-master]').count(),1,'More tools offers the same master list');
+const combinedCount=await page.evaluate(()=>new Set([...hosts.map(h=>h.genus),...Object.keys(BEE_HOST_INDEX)]).size);
+assert.equal(await page.locator('#plantMasterListPanel .garden-summary-count').innerText(),new Intl.NumberFormat('en-US').format(combinedCount)+' plant groups');
+await page.locator('.garden-first-featured .plant-master-shortcut').click();
+assert.equal(await page.locator('#plantMasterListPanel').evaluate(el=>el.open),true,'Plant A–Z shortcut opens index');
+assert.equal(await page.locator('#plantMasterRows .plant-master-row').count(),60,'Render a small page rather than every row on iPhone');
+assert(await page.locator('#plantMasterMeta').innerText().then(t=>t.includes(new Intl.NumberFormat('en-US').format(combinedCount))),'Visible master list count includes union of both datasets');
+assert(await page.locator('#plantMasterRows .plant-master-common').evaluateAll(nodes=>{
+  const names=nodes.map(el=>el.textContent);
+  const known=names.filter(t=>t!=='Common name not listed');
+  const collator=new Intl.Collator('en',{sensitivity:'base',numeric:true});
+  return known.every((name,i)=>i===0||collator.compare(known[i-1],name)<=0);
+}),'Default master list orders known common names alphabetically');
+await page.locator('#plantMasterSort').selectOption('latin');
+assert(await page.locator('#plantMasterRows .plant-master-latin').evaluateAll(nodes=>{
+  const names=nodes.map(el=>el.textContent);
+  const collator=new Intl.Collator('en',{sensitivity:'base',numeric:true});
+  return names.every((name,i)=>i===0||collator.compare(names[i-1],name)<=0);
+}),'Scientific-name ordering is alphabetical');
+await page.locator('#plantMasterLetter').selectOption('S');
+assert((await page.locator('#plantMasterRows .plant-master-latin').allTextContents()).every(name=>name.startsWith('S')),'Alphabet jump filters scientific names');
+await page.locator('#plantMasterLetter').selectOption('');
+await page.locator('#plantMasterSearch').fill('Helianthus');
+assert.equal(await page.locator('#plantMasterRows .plant-master-row').count(),1,'Search finds exact genus');
+assert.equal(await page.locator('#plantMasterRows .plant-master-row').first().locator('.plant-master-count').first().innerText(),'🦋 101');
+assert.equal(await page.locator('#plantMasterRows .plant-master-row').first().locator('.plant-master-count').last().innerText(),'🐝 72');
+await page.locator('#plantMasterSearch').fill('Quercus');
+assert.equal(await page.locator('#plantMasterRows .plant-master-row').count(),1,'Oak genus can be found by scientific name');
+assert.equal(await page.locator('#plantMasterRows .plant-master-row').first().locator('.plant-master-count').last().innerText(),'🐝 —','Unlisted bee relationships are a dash');
+await page.locator('#plantMasterSearch').fill('');
+await page.locator('#plantMasterSort').selectOption('common');
+await page.locator('#plantMasterLoadMore').click();
+assert.equal(await page.locator('#plantMasterRows .plant-master-row').count(),120,'Show-more reveals more alphabetical entries without a massive initial DOM');
+await page.locator('#plantMasterSearch').fill('goldenrods');
+assert.equal(await page.locator('#plantMasterRows .plant-master-row[data-genus="Solidago"]').count(),1,'Common-name search works');
+await page.locator('#plantMasterRows .plant-master-row[data-genus="Solidago"]').click();
+await page.waitForFunction(()=>document.querySelector('#hostPlantSpotlight')?.dataset.genus==='Solidago');
+assert.equal(await page.locator('#view-hosts').evaluate(el=>el.classList.contains('active')),true,'Master list opens existing plant story');
+await page.locator('#plantMasterListPanel').evaluate(el=>el.open=false);
+await page.locator('#gardenMoreTools summary').click();
+await page.locator('#gardenMoreTools [data-open-master]').click();
+assert.equal(await page.locator('#plantMasterListPanel').evaluate(el=>el.open),true,'More tools can reopen master list');
+await page.locator('#plantMasterListPanel').evaluate(el=>el.open=false);
 await page.locator('#gardenAllPlantsDetails').evaluate(el=>el.open=true);
 await page.locator('#hostGrid .host-card').first().waitFor();
 assert.equal(await page.locator('#hostGrid .host-card').first().locator('.garden-toggle').getAttribute('data-genus'),'Quercus','Expected top Lepidoptera genus is oak');
@@ -91,6 +138,11 @@ await page.locator('#gardenAllPlantsDetails').evaluate(el=>el.open=true);await p
 await page.locator('#hostSearch').fill('sunflower');await page.locator('#heroHostSearchForm').evaluate(form=>form.requestSubmit());await page.locator('#hostGrid .host-card .host-bee-metric strong').first().waitFor();assert.equal(await page.locator('#hostGrid .host-card .host-bee-metric strong').first().innerText(),'72','Helianthus should display 72 specialist bees in the number row');assert.equal(await page.locator('#hostGrid .host-card .bee-pollen-strip').count(),0,'No extra bee number strip below the count row');await page.locator('#hostGrid .host-card button').filter({hasText:'Meet the bees'}).first().waitFor();await page.locator('#hostGrid .host-card button').filter({hasText:'Meet the bees'}).first().click();const frame=page.frameLocator('#beeExplorer');await frame.locator('#stats strong').first().waitFor(); await frame.locator('#modalTitle').waitFor();assert.equal(await frame.locator('#modalTitle').innerText(),'Helianthus');await frame.locator('.modal-close').click();assert.deepEqual(await frame.locator('#stats strong').allTextContents(),['329','6','178']);await openTab('garden');assert(await page.locator('#gardenBeeSummary').innerText().then(t=>t.includes('83 different bees')));assert.equal(await page.locator('#gardenBeePlants .shared-bee-plant').count(),4);assert(await page.locator('#gardenGrid .bee-collection-metric').count()>0,'Garden cards show bee metrics');await openTab('bees');await page.frames().find(f=>f.url().includes('/bees/')).evaluate(()=>openPlant('Salvia'));await frame.locator('#modalGarden').click();await page.waitForFunction(()=>!gardenPlants.has('Salvia'));await frame.locator('#modalGarden').click();await page.waitForFunction(()=>gardenPlants.has('Salvia'));await frame.locator('.modal-close').click();await openTab('compare');assert(await page.locator('#compareBeeSummary').innerText().then(t=>t.includes('Bee pollen connections')));assert.equal(await page.locator('.bee-pollen-table-row').count(),1,'Comparison table displays bee metrics');const beeOnly=await page.evaluate(()=>Object.keys(BEE_HOST_INDEX).find(genus=>!hosts.some(host=>host.genus===genus)));if(beeOnly){await openTab('hosts');await page.locator('#hostSearch').fill(beeOnly);await page.locator('#heroHostSearchForm').evaluate(form=>form.requestSubmit());await page.locator('#beeOnlyPlantMatches .bee-only-card').filter({hasText:beeOnly}).first().waitFor();assert(await page.locator('#beeOnlyPlantMatches').isVisible(),'Bee-only host results must remain discoverable from main search');await page.locator('#beeOnlyPlantMatches .bee-only-card button').first().click();await frame.locator('#modalTitle').waitFor();assert.equal(await frame.locator('#modalTitle').innerText(),beeOnly);await frame.locator('.modal-close').click()}await openTab('species');assert(await page.locator('#view-species').evaluate(el=>el.classList.contains('active')));await openTab('local');assert.equal(await page.locator('#localUseLocation').count(),1);assert.equal(await page.locator('#countyQuickSelect').count(),1);assert(await page.locator('#countyQuickSelect option').allTextContents().then(a=>a.includes('Hays County')&&a.includes('Comal County')));await openTab('hosts');await page.locator('#themeToggle').click();await openTab('bees');assert(await frame.locator('body').evaluate(el=>el.classList.contains('dark')));await page.locator('#themeToggle').click();await openTab('hosts');if(process.env.BEE_SCREENSHOTS)await page.screenshot({path:path.join(process.env.BEE_SCREENSHOTS,'combined-desktop.png'),fullPage:true});await page.setViewportSize({width:375,height:812});
 assert.equal(await page.locator('#featuredNativeGrid').evaluate(grid=>getComputedStyle(grid).gridTemplateColumns.split(' ').length),3,'Phone gallery uses 3 small tiles across');
 assert(await page.locator('#featuredNativeGrid').evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Photo tiles should not scroll sideways');
+await page.locator('#plantMasterListPanel').evaluate(el=>el.open=true);
+assert(await page.locator('#plantMasterRows').evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Master list rows fit 375px phone');
+assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Master list does not create horizontal page overflow');
+await page.locator('#plantMasterListPanel').evaluate(el=>el.open=false);
+
 assert(await page.locator('#featuredNativeGrid .featured-native-card').first().evaluate(tile=>{
   const stack=tile.querySelector('.featured-wildlife-counts'),outer=tile.getBoundingClientRect(),inside=stack.getBoundingClientRect();
   return inside.left>=outer.left-1&&inside.right<=outer.right+1&&inside.top>=outer.top-1&&inside.bottom<=outer.bottom+1;
