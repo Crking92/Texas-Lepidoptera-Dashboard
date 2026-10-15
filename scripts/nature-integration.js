@@ -329,7 +329,48 @@ function initCuriosityFirst(){
   const head=featurePanel.querySelector('h2');
   if(head)head.textContent='A few plants to get curious about';
   const headDescription=featurePanel.querySelector('.collection-head p');
-  if(headDescription)headDescription.textContent='Choose a photo to see who depends on that plant.';
+  if(headDescription)headDescription.textContent='Choose a little picture and follow its story.';
+  // Offer more varied entry points without changing or reclassifying any source
+  // records. A tile represents a genus, never every species in that genus.
+  const bonusPlants=[
+    ['Symphyotrichum','Asters'],
+    ['Rudbeckia','Black-eyed Susans'],
+    ['Oenothera','Evening primroses'],
+    ['Cirsium','Thistles'],
+    ['Heterotheca','Camphorweeds'],
+    ['Erigeron','Fleabanes']
+  ];
+  if(featuredGrid){
+    for(const [genus,common] of bonusPlants){
+      if(!hosts.some(h=>h.genus===genus)||featuredGrid.querySelector('[data-featured-genus="'+genus+'"]'))continue;
+      const tile=document.createElement('article');tile.className='featured-native-card garden-bonus-tile';
+      tile.dataset.featuredGenus=genus;tile.tabIndex=0;tile.setAttribute('aria-label','Explore '+common);
+      const top=document.createElement('div');top.className='featured-native-top';
+      const copy=document.createElement('div');
+      const friendly=document.createElement('div');friendly.className='featured-native-common';friendly.textContent=common;
+      const scientific=document.createElement('div');scientific.className='featured-native-name';scientific.textContent=genus;
+      copy.append(friendly,scientific);
+      top.append(makeTaxonThumb(genus,'Plant in the genus '+genus,'Plantae'),copy);
+      tile.append(top);
+      tile.addEventListener('click',()=>focusHost(genus));
+      tile.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target===tile){e.preventDefault();focusHost(genus)}});
+      featuredGrid.append(tile);
+    }
+    observePendingThumbnails(featuredGrid);
+    // These tiles are the invitation. Facts, source methods, saving, bee
+    // relationships and county breakdown remain in the clicked-through view.
+    for(const tile of featuredGrid.querySelectorAll('.featured-native-card')){
+      const genus=tile.dataset.featuredGenus||tile.querySelector('.featured-native-name')?.textContent?.trim();
+      const common=tile.querySelector('.featured-native-common')?.textContent?.trim();
+      if(genus){
+        tile.dataset.featuredGenus=genus;
+        tile.setAttribute('aria-label','Explore '+(common||genus)+' ('+genus+')');
+        tile.title='Open the plant story for '+(common||genus);
+      }
+      const kicker=tile.querySelector('.featured-native-kicker');
+      if(kicker)kicker.setAttribute('aria-hidden','true');
+    }
+  }
   featurePanel.after(spotlight);
 
   const browse=document.createElement('details');browse.id='gardenAllPlantsDetails';
