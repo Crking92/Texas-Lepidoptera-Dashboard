@@ -83,9 +83,9 @@ function initBeePlantVisibility(){
       if(!row.querySelector('.host-bee-metric')){
         const metric=document.createElement('div'),number=document.createElement('strong'),label=document.createElement('span');
         metric.className='host-bee-metric bee-pollen-metric';
-        if(!count)metric.classList.add('bee-pollen-unlisted');
         metric.title=infoText;
         const count=beePollenConnectionCount(genus);
+        if(!count)metric.classList.add('bee-pollen-unlisted');
         number.textContent=count?fmt.format(count):'—';
         label.className='bee-pollen-label';
         label.textContent=count?'TX specialist bees':'Specialist bees: not listed';
