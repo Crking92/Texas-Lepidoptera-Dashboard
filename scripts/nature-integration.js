@@ -436,32 +436,125 @@ function initCuriosityFirst(){
   grid?.addEventListener('click',enterStory,true);
   grid?.addEventListener('keydown',enterStory,true);
 
-  // A few actual insect records are a playful gateway to the full species data.
+  // Begin each opened genus story with a photo, concise connections and
+  // real insect photo tiles. Longer interpretations remain in a disclosure.
+  function syncStoryCounty(){
+    const story=spotlight.querySelector('.garden-story-stats');
+    if(!story)return;
+    const genus=spotlight.dataset.genus;
+    const selected=document.getElementById('countyQuickSelect')?.value||'';
+    const countyMetric=story.querySelector('.garden-story-county');
+    if(!selected){countyMetric?.remove();story.classList.remove('has-county');return}
+    const local=[...document.querySelectorAll('#hostGrid .host-card')].find(card=>
+      card.querySelector('.garden-toggle[data-genus]')?.dataset.genus===genus
+    )?.querySelector('.host-county-metric strong');
+    if(!countyMetric){
+      const metric=document.createElement('div');metric.className='garden-story-county';
+      metric.append(document.createElement('strong'),document.createElement('span'));
+      story.append(metric);
+    }
+    const current=story.querySelector('.garden-story-county');
+    current.querySelector('strong').textContent=local?.textContent?.trim()||'…';
+    current.querySelector('span').textContent=selected+' Co. seen';
+    current.title='iNaturalist Research Grade observations of source-linked Lepidoptera in '+selected+
+      ' County, not observed caterpillar feeding on this genus';
+    story.classList.add('has-county');
+  }
+  const hostGrid=document.getElementById('hostGrid');
+  if(hostGrid)new MutationObserver(syncStoryCounty).observe(hostGrid,{subtree:true,childList:true,characterData:true});
+  document.getElementById('countyQuickSelect')?.addEventListener('change',()=>queueMicrotask(syncStoryCounty));
+
   function fillSpotlight(){
     if(spotlight.hidden||!spotlight.querySelector('.spotlight-head')||
        spotlight.querySelector('.garden-insect-teaser'))return;
     const genus=spotlight.dataset.genus;if(!genus)return;
+    const host=hosts.find(h=>h.genus===genus);
+    const head=spotlight.querySelector('.spotlight-head');
+    const copy=head?.querySelector(':scope > div');
+    const actions=head?.querySelector('.spotlight-actions');
+    const nativeWrap=copy?.querySelector('.native-status-wrap');
+    const existingText=copy?.querySelector(':scope > p:not(.bee-spotlight-note)');
+    const comparison=actions?.querySelector('button:not(.garden-toggle):not(.bee-connection-action)');
+    const clearButton=[...actions?.querySelectorAll('button')||[]].find(button=>/clear plant/i.test(button.textContent||''));
+    const method=document.createElement('details');method.className='garden-story-more';
+    const methodSummary=document.createElement('summary');methodSummary.textContent='More about these numbers & sources';
+    const contents=document.createElement('div');contents.className='garden-story-method-copy';
+    const definition=document.createElement('p');
+    definition.textContent='Counts are genus-wide associations from the Texas-range UDELep source and Texas-listed specialist-bee relationships from Jarrod Fowler. They are not proof of local feeding or that every plant species in the genus supports every insect.';
+    contents.append(definition);
+    if(existingText)contents.append(existingText);
+    if(nativeWrap)contents.append(nativeWrap);
+    const note=spotlight.querySelector('.spotlight-note');
+    if(note)contents.append(note);
+    if(comparison||clearButton){
+      const extra=document.createElement('div');extra.className='garden-story-advanced-actions';
+      if(comparison&&comparison!==clearButton)extra.append(comparison);
+      if(clearButton)extra.append(clearButton);
+      contents.append(extra);
+    }
+    method.append(methodSummary,contents);
+
+    if(copy){
+      copy.querySelector('h2')?.classList.add('garden-story-heading');
+      copy.querySelector('.eyebrow')?.remove();
+    }
+    const stats=document.createElement('div');stats.className='garden-story-stats';
+    function metric(number,label,tip,klass){
+      const item=document.createElement('div');item.className=klass||'';
+      const value=document.createElement('strong');value.textContent=number;
+      const caption=document.createElement('span');caption.textContent=label;
+      item.title=tip;item.append(value,caption);stats.append(item);
+    }
+    metric('🦋 '+fmt.format(host?.establishedCount||0),'TX butterfly & moth links',
+      'Genus-level Texas-range UDELep host associations; not every plant species hosts every taxon','garden-story-lep');
+    const bees=beePollenConnectionCount(genus);
+    metric(bees?'🐝 '+fmt.format(bees):'—',bees?'TX specialist bees':'Specialist bees not listed',
+      'Jarrod Fowler Texas-listed pollen specialists. Not listed does not mean no bees visit','garden-story-bees-count');
+    head.after(stats);
+
+    const storyActions=document.createElement('div');storyActions.className='garden-story-primary-actions';
+    const insectButton=document.createElement('button');insectButton.type='button';
+    insectButton.className='button primary garden-story-insect-action';
+    insectButton.textContent='🦋 Meet the insects';
+    insectButton.addEventListener('click',()=>spotlight.querySelector('.garden-insect-teaser')?.scrollIntoView({
+      behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'
+    }));
+    storyActions.append(insectButton);
+    if(bees){
+      const beeButton=document.createElement('button');beeButton.type='button';
+      beeButton.className='button garden-story-bees-action';beeButton.textContent='🐝 Meet the bees';
+      beeButton.addEventListener('click',()=>openBeePlant(genus));
+      storyActions.append(beeButton);
+    }
+    const save=actions?.querySelector('.garden-toggle');
+    if(save)storyActions.append(save);
+    stats.after(storyActions);
+
     const insectRecords=(hostRecordMap.get(genus)||[]).filter(r=>r.statusKey==='established'||r.statusKey==='both');
     const ranked=insectRecords.slice().sort((a,b)=>
       (Number(['Butterfly','Skipper'].includes(b.category))-Number(['Butterfly','Skipper'].includes(a.category)))||
       String(friendlyCommonName(a.common)).localeCompare(String(friendlyCommonName(b.common))));
     const teaser=document.createElement('section');teaser.className='garden-insect-teaser';
-    const h=document.createElement('h3');h.textContent='Meet a few of its insect neighbors';
-    const expl=document.createElement('p');
-    expl.textContent='These are source-listed caterpillar-host relationships, not proof of feeding at this exact spot.';
-    const chips=document.createElement('div');chips.className='garden-insect-chips';
+    const heading=document.createElement('h3');heading.textContent='Meet its insect neighbors';
+    const chips=document.createElement('div');chips.className='garden-insect-chips garden-insect-photo-grid';
     ranked.slice(0,4).forEach(r=>{
       const button=document.createElement('button');button.type='button';
-      button.className='garden-insect-chip';
-      const name=friendlyCommonName(r.common);
-      button.textContent=(['Butterfly','Skipper'].includes(r.category)?'🦋 ':'🌙 ')+(name||r.species);
-      button.title=r.species;
-      button.addEventListener('click',()=>openModal(r));
+      button.className='garden-insect-chip garden-insect-photo-tile';
+      const image=makeTaxonThumb(photoLookupName(r.species),friendlyCommonName(r.common),'Insecta');
+      const name=document.createElement('span');name.className='garden-insect-name';
+      name.textContent=friendlyCommonName(r.common)||r.species;
+      button.append(image,name);
+      button.title='Meet '+name.textContent+' ('+r.species+')';
+      // Photos are credited through the reusable-image metadata and in the
+      // insect's modal. The entire tile must open that insect, not iNaturalist.
+      button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();openModal(r)},true);
       chips.append(button);
     });
+    const expl=document.createElement('p');expl.className='garden-insect-teaser-note';
+    expl.textContent='Tap an insect to learn more. Source-linked host relationships are not local feeding records.';
     const all=document.createElement('button');all.type='button';
     all.className='button small garden-more-insects';
-    all.textContent='See all linked butterflies and moths →';
+    all.textContent='See all linked insects →';
     all.addEventListener('click',()=>exploreHost(genus));
     const again=document.createElement('button');again.type='button';
     again.className='button small garden-try-another';
@@ -469,9 +562,11 @@ function initCuriosityFirst(){
     again.addEventListener('click',()=>surprisePlant());
     const nextActions=document.createElement('div');nextActions.className='garden-story-actions';
     nextActions.append(all,again);
-    teaser.append(h,expl,chips,nextActions);
-    const note=spotlight.querySelector('.spotlight-note');
-    if(note)note.before(teaser);else spotlight.append(teaser);
+    teaser.append(heading,chips,expl,nextActions);
+    spotlight.append(teaser,method);
+    spotlight.classList.add('garden-story-ready');
+    observePendingThumbnails(chips);
+    syncStoryCounty();
   }
   new MutationObserver(fillSpotlight).observe(spotlight,{childList:true});
   fillSpotlight();
