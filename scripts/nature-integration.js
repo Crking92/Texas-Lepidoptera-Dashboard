@@ -655,11 +655,201 @@ function initCuriosityFirst(){
     gardenView.append(more);
   }
 }
+
+/* One compact A–Z index for all plant genera present in either scientific
+   source. Only a page of rows is rendered at a time for older iPhones.
+   This is a genus index, not a list of individual native plant species. */
+function initPlantMasterList(){
+  const view=document.getElementById('view-hosts');
+  const spotlight=document.getElementById('hostPlantSpotlight');
+  if(!view||!spotlight||document.getElementById('plantMasterListPanel'))return;
+  const known=new Map();
+  for(const host of hosts){
+    known.set(host.genus,{
+      genus:host.genus,
+      lepidoptera:host.establishedCount,
+      beeCount:0,
+      common:POPULAR_HOST_NAMES[host.genus]||'',
+      hasLepidoptera:true
+    });
+  }
+  for(const [genus,records] of Object.entries(BEE_HOST_INDEX)){
+    const bees=new Set(records.map(bee=>bee.name)).size;
+    if(!known.has(genus))known.set(genus,{
+      genus,lepidoptera:null,beeCount:bees,
+      common:POPULAR_HOST_NAMES[genus]||'',
+      hasLepidoptera:false
+    });
+    else known.get(genus).beeCount=bees;
+  }
+  const all=[...known.values()];
+  const natural=new Intl.Collator('en',{sensitivity:'base',numeric:true});
+  const panel=document.createElement('details');panel.id='plantMasterListPanel';
+  panel.className='garden-progressive-section plant-master-panel';
+  const summary=document.createElement('summary');
+  const title=document.createElement('span');title.textContent='Plant Master List A–Z';
+  const count=document.createElement('span');count.className='garden-summary-count';
+  count.textContent=fmt.format(all.length)+' plant groups';
+  summary.append(title,count);panel.append(summary);
+
+  const body=document.createElement('div');body.className='plant-master-body';
+  const intro=document.createElement('p');intro.className='plant-master-intro';
+  intro.textContent='Every plant genus found in the butterfly, moth, or specialist-bee sources. Search by either name, or choose which alphabet to browse.';
+  const controls=document.createElement('div');controls.className='plant-master-controls';
+  const searchWrap=document.createElement('label');searchWrap.className='plant-master-search';
+  searchWrap.append(document.createTextNode('Find a plant'));
+  const search=document.createElement('input');search.type='search';search.id='plantMasterSearch';
+  search.placeholder='Common or scientific name';search.autocomplete='off';
+  searchWrap.append(search);
+  const sortWrap=document.createElement('label');sortWrap.className='plant-master-sort';
+  sortWrap.append(document.createTextNode('Alphabetize by'));
+  const sort=document.createElement('select');sort.id='plantMasterSort';
+  for(const [value,label] of [['common','Common name A–Z'],['latin','Scientific name A–Z']]){
+    const opt=document.createElement('option');opt.value=value;opt.textContent=label;sort.append(opt);
+  }
+  sortWrap.append(sort);
+  const jumpWrap=document.createElement('label');jumpWrap.className='plant-master-jump';
+  jumpWrap.append(document.createTextNode('Jump to letter'));
+  const jump=document.createElement('select');jump.id='plantMasterLetter';
+  jumpWrap.append(jump);
+  controls.append(searchWrap,sortWrap,jumpWrap);
+
+  const meta=document.createElement('p');meta.id='plantMasterMeta';
+  meta.className='plant-master-meta';meta.setAttribute('role','status');
+  meta.setAttribute('aria-live','polite');
+  const list=document.createElement('div');list.id='plantMasterRows';
+  list.className='plant-master-rows';
+  const load=document.createElement('button');load.type='button';
+  load.id='plantMasterLoadMore';load.className='garden-see-all plant-master-more';
+  load.textContent='Show more plants ↓';
+  const caveat=document.createElement('p');caveat.className='plant-master-source';
+  caveat.append('🦋 Texas-range caterpillar-host associations (UDELep) · 🐝 Texas-listed pollen-specialist bee relationships (');
+  const link=document.createElement('a');link.href='https://jarrodfowler.com/bees_pollen.html';
+  link.target='_blank';link.rel='noopener noreferrer';link.textContent='Jarrod Fowler';
+  caveat.append(link,'). A dash means no entry in that dataset, not that the plant has no wildlife value. Common names are shown where supplied; entries without one remain searchable by scientific name.');
+  body.append(intro,controls,meta,list,load,caveat);panel.append(body);
+
+  const detailed=document.getElementById('gardenAllPlantsDetails');
+  if(detailed)detailed.before(panel);else spotlight.after(panel);
+
+  const PAGE=60;let visible=PAGE;
+  const commonName=x=>x.common||'';
+  const firstLetter=x=>{
+    const name=sort.value==='latin'?x.genus:commonName(x);
+    return name?name[0].toUpperCase().replace(/[^A-Z]/g,'#'):'?';
+  };
+  function updateLetterOptions(){
+    const current=jump.value||'';
+    const available=new Set(all.map(firstLetter));
+    const letters=['',...Array.from(available).sort(natural.compare)];
+    jump.replaceChildren();
+    for(const letter of letters){
+      const option=document.createElement('option');option.value=letter;
+      option.textContent=letter?(letter==='?'?'No common name':letter):'All letters';
+      jump.append(option);
+    }
+    jump.value=letters.includes(current)?current:'';
+  }
+  function render(reset=false){
+    if(reset)visible=PAGE;
+    const query=search.value.toLocaleLowerCase('en').trim();
+    const matching=all.filter(x=>
+      (!query||x.genus.toLocaleLowerCase('en').includes(query)||
+        commonName(x).toLocaleLowerCase('en').includes(query))&&
+      (!jump.value||firstLetter(x)===jump.value));
+    matching.sort((a,b)=>{
+      if(sort.value==='latin')return natural.compare(a.genus,b.genus);
+      // Unknown common names come last; never manufacture an English name.
+      if(!a.common&&b.common)return 1;
+      if(a.common&&!b.common)return -1;
+      return natural.compare(a.common||a.genus,b.common||b.genus)||natural.compare(a.genus,b.genus);
+    });
+    list.replaceChildren();
+    const slice=matching.slice(0,visible);
+    for(const plant of slice){
+      const row=document.createElement('button');row.type='button';row.className='plant-master-row';
+      row.dataset.genus=plant.genus;
+      const names=document.createElement('span');names.className='plant-master-names';
+      const common=document.createElement('strong');common.className='plant-master-common';
+      common.textContent=plant.common||'Common name not listed';
+      const latin=document.createElement('em');latin.className='plant-master-latin';latin.textContent=plant.genus;
+      names.append(common,latin);
+      const badges=document.createElement('span');badges.className='plant-master-badges';
+      const lep=document.createElement('span');lep.className='plant-master-count';
+      lep.textContent='🦋 '+(plant.hasLepidoptera?fmt.format(plant.lepidoptera):'—');
+      lep.title=plant.hasLepidoptera
+        ?'Texas-range Lepidoptera host taxa linked to genus '+plant.genus
+        :'No Lepidoptera host record indexed for genus '+plant.genus;
+      const bee=document.createElement('span');bee.className='plant-master-count';
+      bee.textContent='🐝 '+(plant.beeCount?fmt.format(plant.beeCount):'—');
+      bee.title=plant.beeCount
+        ?'Texas-listed pollen-specialist bee species linked to genus '+plant.genus
+        :'Specialist-bee relationship not listed in Fowler’s dataset';
+      badges.append(lep,bee);
+      const arrow=document.createElement('span');arrow.className='plant-master-arrow';
+      arrow.textContent='›';arrow.setAttribute('aria-hidden','true');
+      row.append(names,badges,arrow);
+      row.setAttribute('aria-label', (plant.common?plant.common+', ':'')+plant.genus+
+        ', Lepidoptera '+(plant.hasLepidoptera?plant.lepidoptera:'not listed')+
+        ', specialist bees '+(plant.beeCount?plant.beeCount:'not listed')+
+        '. Open plant details');
+      row.addEventListener('click',()=>{
+        if(plant.hasLepidoptera)focusHost(plant.genus);
+        else openBeePlant(plant.genus);
+      });
+      list.append(row);
+    }
+    meta.textContent=matching.length
+      ?'Showing '+fmt.format(slice.length)+' of '+fmt.format(matching.length)+' plant groups'
+      : 'No matching plant groups';
+    load.hidden=visible>=matching.length;
+    if(!matching.length){
+      const empty=document.createElement('p');empty.className='plant-master-empty';
+      empty.textContent='Try another common or scientific name.';
+      list.append(empty);
+    }
+  }
+  search.addEventListener('input',()=>render(true));
+  sort.addEventListener('change',()=>{updateLetterOptions();render(true)});
+  jump.addEventListener('change',()=>render(true));
+  load.addEventListener('click',()=>{visible+=PAGE;render()});
+  panel.addEventListener('toggle',()=>{if(panel.open&&!list.children.length){updateLetterOptions();render(true)}});
+  updateLetterOptions();
+
+  // A short route beside the featured photos, plus a link in More tools.
+  const panelHeading=view.querySelector('.garden-first-featured .collection-head');
+  if(panelHeading&&!panelHeading.querySelector('.plant-master-shortcut')){
+    const button=document.createElement('button');button.type='button';
+    button.className='garden-discovery-chip plant-master-shortcut';
+    button.textContent='Plant A–Z';
+    button.addEventListener('click',()=>openMaster());
+    panelHeading.append(button);
+  }
+  const menu=document.querySelector('#gardenMoreTools .garden-more-options');
+  if(menu&&!menu.querySelector('[data-open-master]')){
+    const button=document.createElement('button');button.type='button';
+    button.dataset.openMaster='1';button.textContent='Plant Master List A–Z';
+    button.addEventListener('click',()=>{
+      document.getElementById('gardenMoreTools').open=false;
+      openMaster();
+    });
+    menu.prepend(button);
+  }
+  function openMaster(){
+    switchTab('hosts');
+    panel.open=true;
+    if(!list.children.length)render(true);
+    requestAnimationFrame(()=>{
+      panel.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+    });
+  }
+}
 function initNatureIntegration(){
 initCombinedSortAndBeeCredit();
 initCountyDiscovery();
 initBeePlantVisibility();
 initCuriosityFirst();
+initPlantMasterList();
 const beeFrame=document.getElementById('beeExplorer');beeFrame.addEventListener('load',syncBeeTheme);
 document.getElementById('themeToggle').addEventListener('click',syncBeeTheme);
 window.addEventListener('storage',event=>{if(event.key==='txlep-garden'){gardenPlants.clear();readStoredArray('txlep-garden').forEach(g=>gardenPlants.add(g));renderGarden();renderComparison()}});
