@@ -11,7 +11,7 @@ function renderGardenBeeConnections(){
   available.forEach(g=>BEE_HOST_INDEX[g].forEach(b=>unique.set(b.name,b)));
   document.getElementById('gardenBeeSummary').textContent=`${unique.size} different bees linked to ${available.length} saved plant groups. Butterfly and moth totals remain separate below.`;
   const plants=document.getElementById('gardenBeePlants');plants.replaceChildren();
-  [...gardenPlants].sort().forEach(g=>{const card=node('div','shared-bee-plant');const copy=node('span','',`${POPULAR_HOST_NAMES[g]||g} · ${g}`);card.append(copy);const count=BEE_HOST_INDEX[g]?.length||0;if(count){const button=node('button','button small',`${count} bees →`);button.onclick=()=>openBeePlant(g);card.append(button)}else card.append(node('span','microcopy','No counted bee link in this source'));if(!hosts.some(h=>h.genus===g)){const remove=node('button','button small','Remove');remove.onclick=()=>toggleGarden(g);card.append(remove)}plants.append(card)});
+  [...gardenPlants].sort().forEach(g=>{const card=node('div','shared-bee-plant');const copy=node('span','',`${POPULAR_HOST_NAMES[g]||g} · ${g}`);card.append(copy);const count=BEE_HOST_INDEX[g]?.length||0;if(count){const button=node('button','button small',`${count} bees →`);button.onclick=()=>openBeePlant(g);card.append(button)}else card.append(node('span','microcopy','Specialist bee data not listed'));if(!hosts.some(h=>h.genus===g)){const remove=node('button','button small','Remove');remove.onclick=()=>toggleGarden(g);card.append(remove)}plants.append(card)});
   const list=document.getElementById('gardenBeeList');list.replaceChildren();
   [...unique.values()].sort((a,b)=>a.name.localeCompare(b.name)).forEach(b=>{const row=node('button','button small',`${b.name} · ${b.family}`);row.onclick=()=>{switchTab('bees');const frame=document.getElementById('beeExplorer');const open=()=>frame.contentWindow.openBee(b.name);if(typeof frame.contentWindow.openBee==='function')open();else frame.addEventListener('load',open,{once:true})};list.append(row)});
 }
@@ -29,7 +29,7 @@ function beePollenConnectionCount(genus){
   return new Set((BEE_HOST_INDEX[genus]||[]).map(item=>item.name)).size;
 }
 function initBeePlantVisibility(){
-  const infoText='Source: Fowler pollen-specialist bee relationships for bees listed in Texas. These are not Hays County sightings or proof of local pollen collection.';
+  const infoText='Source: Jarrod Fowler’s pollen-specialist bee relationships for bees listed in Texas. No entry means specialist-bee data not listed, not zero bee visitors. These are not Hays County sightings or proof of local pollen collection.';
   const supported=genus=>beePollenConnectionCount(genus)>0;
   const details=(genus,event)=>{
     event?.stopPropagation();
@@ -46,7 +46,9 @@ function initBeePlantVisibility(){
       label.textContent=' TX-listed pollen-specialist '+(count===1?'bee':'bees');
       el.append(amount,label);
     }else{
-      label.textContent='🐝 No specialist-bee relationship listed in this source';
+      const missing=document.createElement('strong');missing.textContent='—';missing.className='bee-missing-symbol';
+      el.append(missing);
+      label.textContent=' Specialist bee data not listed';
       el.classList.add('bee-pollen-unlisted');el.append(label);
     }
     return el;
@@ -81,12 +83,13 @@ function initBeePlantVisibility(){
       if(!row.querySelector('.host-bee-metric')){
         const metric=document.createElement('div'),number=document.createElement('strong'),label=document.createElement('span');
         metric.className='host-bee-metric bee-pollen-metric';
+        if(!count)metric.classList.add('bee-pollen-unlisted');
         metric.title=infoText;
         const count=beePollenConnectionCount(genus);
         number.textContent=count?fmt.format(count):'—';
         label.className='bee-pollen-label';
-        label.textContent=count?'TX specialist bees':'No bees listed';
-        metric.setAttribute('aria-label',count?count+' Texas-listed pollen-specialist bees linked to '+genus:'No specialist bees listed for '+genus+' in the current source');
+        label.textContent=count?'TX specialist bees':'Specialist bees: not listed';
+        metric.setAttribute('aria-label',count?count+' Texas-listed pollen-specialist bees linked to '+genus:'Specialist bee data not listed for '+genus+' in the current source; this does not mean that no bees use this plant');
         metric.append(number,label);
         row.append(metric);
       }
@@ -129,7 +132,7 @@ function initBeePlantVisibility(){
       extra.className='bee-spotlight-note';
       extra.textContent=count?
         '🐝 '+count+' Texas-listed pollen-specialist '+(count===1?'bee is':'bees are')+' linked to '+genus+' in Fowler’s source (not county sightings).':
-        '🐝 No pollen-specialist bee relationship is listed for this genus in the current source; this is not a measure of all bee visits.';
+        '🐝 Specialist bee data not listed for this plant group in the current source. Other bees may still visit its flowers.';
       extra.title=infoText;extra.classList.add('bee-pollen-metric');copy.append(extra);
       if(count)target.querySelector('.spotlight-actions')?.append(beeAction(genus));
     });
@@ -143,7 +146,8 @@ function initBeePlantVisibility(){
     cells.forEach(cell=>{
       const genus=cell.textContent.trim(),amount=document.createElement('td');
       const n=beePollenConnectionCount(genus);
-      amount.textContent=n?String(n):'Not listed';
+      amount.textContent=n?String(n):'— Not listed';
+      if(!n)amount.title='Specialist bee data not listed; not proof that the plant is unused by bees.';
       row.append(amount);
     });
     table.querySelector('tbody')?.append(row);
@@ -243,7 +247,7 @@ function initCombinedSortAndBeeCredit(){
   link.href='https://jarrodfowler.com/bees_pollen.html';
   link.target='_blank';link.rel='noopener noreferrer';
   link.textContent='Jarrod Fowler (2020), Pollen Specialist Bees of the Central United States ↗';
-  source.append(link,'. Bees are Texas-listed in that source; these are not Hays County sightings.');
+  source.append(link,'. Bees are Texas-listed in that source; these are not Hays County sightings. A dash (—) means specialist-bee data is not listed, not that a plant has no bees.');
   const note=document.createElement('p');
   note.id='jointSortExplanation';
   note.className='joint-sort-explanation';
