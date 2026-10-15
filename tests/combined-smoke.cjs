@@ -24,10 +24,24 @@ assert.equal(await page.locator('#featuredNativeGrid .featured-native-card').fir
 const tileCounts=await page.locator('#featuredNativeGrid .featured-native-card').evaluateAll(tiles=>tiles.map(tile=>{
   const genus=tile.dataset.featuredGenus;
   const match=hosts.find(host=>host.genus===genus);
-  return {genus,actual:tile.querySelector('.featured-lep-count')?.textContent?.trim(),expected:match?'🦋 '+fmt.format(match.establishedCount):null,badges:tile.querySelectorAll('.featured-lep-count').length};
+  const beeCount=new Set((BEE_HOST_INDEX[genus]||[]).map(bee=>bee.name)).size;
+  const badges=tile.querySelectorAll('.featured-wildlife-counts>span');
+  return {
+    genus,
+    butterfly:tile.querySelector('.featured-lep-count')?.textContent?.trim(),
+    expectedButterfly:match?'🦋 '+fmt.format(match.establishedCount):null,
+    bee:tile.querySelector('.featured-bee-count')?.textContent?.trim(),
+    expectedBee:'🐝 '+(beeCount?fmt.format(beeCount):'—'),
+    badgeCount:badges.length,
+    badgeOrder:[...badges].map(el=>el.className),
+    stackDirection:getComputedStyle(tile.querySelector('.featured-wildlife-counts')).flexDirection
+  };
 }));
-assert.equal(tileCounts.length,12,'All twelve featured tiles have a count');
-assert(tileCounts.every(tile=>tile.actual===tile.expected&&tile.badges===1),'Featured Lepidoptera counts match statewide source figures, once per tile');
+assert.equal(tileCounts.length,12,'All twelve featured tiles show wildlife badges');
+assert(tileCounts.every(tile=>tile.butterfly===tile.expectedButterfly&&tile.bee===tile.expectedBee&&tile.badgeCount===2),'Both tile numbers match their respective source indexes, with missing bees shown as a dash');
+assert(tileCounts.every(tile=>tile.stackDirection==='column'&&tile.badgeOrder[0]==='featured-lep-count'&&tile.badgeOrder[1].includes('featured-bee-count')),'Tile badges stack butterfly above bee');
+assert.equal(tileCounts.find(tile=>tile.genus==='Helianthus')?.bee,'🐝 72','Sunflower uses its confirmed specialist bee count');
+assert.equal(tileCounts.find(tile=>tile.genus==='Quercus')?.bee,'🐝 —','Oak is not misrepresented as zero bees');
 assert.equal(await page.locator('#featuredNativeGrid .featured-native-card').first().evaluate(tile=>getComputedStyle(tile,'::after').content),'none','No extra Explore text on the small tiles');
 await page.locator('#gardenAllPlantsDetails').evaluate(el=>el.open=true);
 await page.locator('#hostGrid .host-card').first().waitFor();
@@ -78,9 +92,9 @@ await page.locator('#hostSearch').fill('sunflower');await page.locator('#heroHos
 assert.equal(await page.locator('#featuredNativeGrid').evaluate(grid=>getComputedStyle(grid).gridTemplateColumns.split(' ').length),3,'Phone gallery uses 3 small tiles across');
 assert(await page.locator('#featuredNativeGrid').evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Photo tiles should not scroll sideways');
 assert(await page.locator('#featuredNativeGrid .featured-native-card').first().evaluate(tile=>{
-  const pill=tile.querySelector('.featured-lep-count'),outer=tile.getBoundingClientRect(),inside=pill.getBoundingClientRect();
-  return inside.left>=outer.left&&inside.right<=outer.right&&inside.top>=outer.top&&inside.bottom<=outer.bottom;
-}),'Count fits completely on the photo tile at 375px width');
+  const stack=tile.querySelector('.featured-wildlife-counts'),outer=tile.getBoundingClientRect(),inside=stack.getBoundingClientRect();
+  return inside.left>=outer.left-1&&inside.right<=outer.right+1&&inside.top>=outer.top-1&&inside.bottom<=outer.bottom+1;
+}),'Both stacked badges fit completely on a 375px phone tile');
 await page.setViewportSize({width:340,height:740});
 assert.equal(await page.locator('#featuredNativeGrid').evaluate(grid=>getComputedStyle(grid).gridTemplateColumns.split(' ').length),2,'Very narrow phone uses two tiles across');
 await page.setViewportSize({width:375,height:812});await openTab('hosts');await page.locator('#hostSearch').fill('Solidago');await page.locator('#heroHostSearchForm').evaluate(form=>form.requestSubmit());await page.locator('#hostGrid .host-card').first().waitFor();await page.locator('#countyQuickSelect').selectOption('Hays');await page.locator('#hostGrid .host-count-pair.has-county').first().waitFor();assert.equal(await page.locator('#hostGrid .host-count-pair.has-county').first().evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),3,'Three metric columns remain visible on a phone');assert(await page.locator('#hostGrid .host-count-pair.has-county').first().evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Three metrics should not overflow the row');await page.locator('#countyQuickSelect').selectOption('');for(const tab of ['hosts','garden','compare','bees','guide']){await openTab(tab);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Overflow ${tab}`)}await openTab('hosts');if(process.env.BEE_SCREENSHOTS)await page.screenshot({path:path.join(process.env.BEE_SCREENSHOTS,'combined-mobile.png'),fullPage:true});await page.evaluate(()=>navigator.serviceWorker.ready);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);await context.setOffline(true);await page.reload();assert.equal(await page.locator('#gardenAllPlantsDetails').evaluate(el=>el.open),false,'Offline version keeps simplified entry');await page.locator('#gardenAllPlantsDetails').evaluate(el=>el.open=true);await page.locator('#hostGrid .host-card').first().waitFor();assert.equal(await page.evaluate(()=>records.length),sourceCount);await openTab('bees');assert.equal(await frame.locator('#stats strong').first().innerText(),'329');assert.deepEqual(errors,[]);console.log('PASS combined: original records, common-name search, plant-to-bee link, shared garden, comparison, original tabs, synchronized theme, mobile layout, offline both modules')}finally{await browser.close();server.close()}})().catch(e=>{console.error(e);process.exit(1)});
