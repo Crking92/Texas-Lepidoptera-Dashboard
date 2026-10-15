@@ -184,3 +184,70 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
   color:var(--ink);
 }
 .joint-sort-explanation[hidden]{display:none!important}
+
+/* Curiosity-first redesign: invite exploration, reveal the science on demand. */
+.curiosity-first header.hero{padding-bottom:25px}
+.curiosity-first header.hero>h1{max-width:14ch;line-height:1.04;letter-spacing:-.035em}
+.curiosity-first header.hero>p{max-width:40ch;font-size:clamp(1rem,2.5vw,1.18rem);line-height:1.5}
+.curiosity-first .nature-scope{font-size:.83rem;line-height:1.55;margin:9px 0 0}
+.garden-method-details{max-width:62ch;border-top:1px solid var(--line);margin-top:19px;padding:13px 0 0}
+.garden-method-details>summary{color:var(--accent);font-size:.83rem;font-weight:700;cursor:pointer}
+.garden-method-details>summary:focus-visible,.garden-progressive-section>summary:focus-visible{outline:3px solid var(--accent-2);outline-offset:4px}
+.garden-welcome{background:linear-gradient(130deg,var(--leafwash),var(--panel));border:1px solid var(--line);padding:26px 27px;border-radius:25px;margin-bottom:22px}
+.garden-welcome-eyebrow{color:var(--accent);font-size:.76rem;font-weight:800;letter-spacing:.055em;text-transform:uppercase}
+.garden-welcome h2{font-family:Georgia,serif;font-size:clamp(1.55rem,3.3vw,2.25rem);margin:8px 0 4px;line-height:1.16}
+.garden-welcome>p{margin:5px 0 16px;color:var(--muted);line-height:1.5}
+.garden-discovery-actions{display:flex;flex-wrap:wrap;gap:9px}
+.garden-discovery-chip{appearance:none;cursor:pointer;min-height:43px;border:1px solid var(--line);background:var(--panel);border-radius:999px;color:var(--ink);font-size:.9rem;font-weight:680;padding:10px 15px;transition:transform .16s ease,background .16s ease,box-shadow .16s ease}
+.garden-discovery-chip:hover{background:var(--sunwash);box-shadow:0 3px 11px #283f310f;transform:translateY(-1px)}
+.garden-discovery-chip:focus-visible,.garden-see-all:focus-visible,.garden-insect-chip:focus-visible{outline:3px solid var(--accent-2);outline-offset:3px}
+.garden-surprise-chip{background:var(--sunwash)}
+.garden-welcome .garden-welcome-hint{font-size:.78rem;color:var(--muted);margin:14px 0 0}
+.garden-first-featured{overflow:hidden}
+.garden-first-featured .collection-head{background:transparent}
+.garden-first-featured .collection-head p{max-width:55ch}
+.garden-first-featured .featured-native-note{line-height:1.5}
+.garden-see-all{display:block;margin:18px auto 20px;padding:11px 20px;background:var(--panel);border:1px solid var(--line);border-radius:999px;font-weight:750;color:var(--accent);cursor:pointer}
+.garden-see-all:hover{background:var(--leafwash)}
+.garden-progressive-section{margin:22px 0;background:var(--panel);border:1px solid var(--line);border-radius:23px;padding:0;overflow:visible}
+.garden-progressive-section>summary{list-style:none;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;min-height:65px;padding:16px 22px;cursor:pointer;font-weight:800;font-size:1.05rem;color:var(--ink);border-radius:23px}
+.garden-progressive-section>summary::-webkit-details-marker{display:none}
+.garden-progressive-section>summary::after{content:'＋';font-size:1.35rem;color:var(--accent);font-weight:400}
+.garden-progressive-section[open]>summary::after{content:'−'}
+.garden-progressive-section[open]>summary{border-bottom:1px solid var(--line);border-radius:23px 23px 0 0;background:var(--leafwash)}
+.garden-summary-count{font-size:.72rem;color:var(--muted);font-weight:500;margin-right:auto}
+.garden-progressive-explainer{font-size:.86rem;color:var(--muted);padding:10px 22px;margin:0}
+.garden-progressive-section>#hostResultsPanel{border:0;box-shadow:none;margin:0;border-radius:0 0 23px 23px;background:transparent}
+.garden-progressive-section>#beeOnlyPlantMatches{margin:15px}
+.garden-science-section>.plant-first-intro{margin:15px 18px}
+.garden-science-section>#hostKpis,.garden-science-section>.dashboard-context{margin:15px 18px}
+.garden-science-section>.dashboard-context{padding-bottom:20px}
+.garden-garden-insects>.garden-insect-panel{border:0;margin:0;background:transparent}
+.garden-insect-teaser{margin:20px 0 13px;padding:18px 22px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(140deg,var(--leafwash),var(--panel))}
+.garden-insect-teaser>h3{font-family:Georgia,serif;font-size:1.36rem;margin:0 0 5px;color:var(--ink)}
+.garden-insect-teaser>p{font-size:.78rem;line-height:1.55;color:var(--muted);margin:0 0 14px}
+.garden-insect-chips{display:flex;flex-wrap:wrap;gap:9px;margin:8px 0 16px}
+.garden-insect-chip{appearance:none;padding:10px 13px;min-height:43px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:15px;cursor:pointer;text-align:left;font-size:.81rem;line-height:1.3;font-weight:700}
+.garden-insect-chip:hover{background:var(--sunwash)}
+.garden-more-insects{margin-top:6px}
+@media(max-width:650px){
+ .curiosity-first header.hero{padding-top:21px;padding-bottom:21px}
+ .curiosity-first header.hero>h1{font-size:clamp(2.2rem,9vw,3.25rem);margin:8px 0}
+ .curiosity-first header.hero>p{font-size:1rem;line-height:1.4;margin-bottom:9px}
+ .curiosity-first header.hero .nature-art{max-height:165px;overflow:hidden}
+ .curiosity-first header.hero .nature-art svg{width:100%;max-height:170px}
+ .garden-welcome{padding:20px 17px;border-radius:21px;margin-bottom:17px}
+ .garden-welcome h2{font-size:1.66rem}
+ .garden-discovery-actions{gap:8px}
+ .garden-discovery-chip{font-size:.78rem;min-height:42px;padding:9px 12px}
+ .garden-progressive-section>summary{padding:15px 17px;min-height:59px;font-size:.94rem}
+ .garden-first-featured .featured-native-grid{display:flex;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scroll-padding:15px;gap:13px;padding:14px 15px 18px;-webkit-overflow-scrolling:touch}
+ .garden-first-featured .featured-native-grid .featured-native-card{min-width:min(78vw,310px);max-width:min(78vw,310px);flex:0 0 min(78vw,310px);scroll-snap-align:start}
+ .garden-first-featured .featured-native-card .featured-native-stats{font-size:.76rem}
+ .garden-insect-teaser{padding:17px}
+ .garden-insect-teaser>h3{font-size:1.22rem}
+ .garden-insect-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .garden-insect-chip{font-size:.75rem}
+}
+@media(max-width:380px){.garden-insect-chips{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.garden-discovery-chip{transition:none}.garden-first-featured .featured-native-grid{scroll-behavior:auto}}
