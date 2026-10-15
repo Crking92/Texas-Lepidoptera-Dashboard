@@ -364,8 +364,18 @@ function initCuriosityFirst(){
       const common=tile.querySelector('.featured-native-common')?.textContent?.trim();
       if(genus){
         tile.dataset.featuredGenus=genus;
-        tile.setAttribute('aria-label','Explore '+(common||genus)+' ('+genus+')');
+        const lepCount=hosts.find(host=>host.genus===genus)?.establishedCount;
+        tile.setAttribute('aria-label','Explore '+(common||genus)+' ('+genus+')'+
+          (Number.isFinite(lepCount)?', '+fmt.format(lepCount)+' Texas-range butterfly and moth taxa linked to this plant genus':''));
         tile.title='Open the plant story for '+(common||genus);
+        if(Number.isFinite(lepCount)&&!tile.querySelector('.featured-lep-count')){
+          const badge=document.createElement('span');
+          badge.className='featured-lep-count';
+          badge.textContent='🦋 '+fmt.format(lepCount);
+          badge.title=fmt.format(lepCount)+' Texas-range butterfly and moth taxa linked to '+genus+' in the source';
+          badge.setAttribute('aria-hidden','true'); // Count is also read in the accessible tile label.
+          tile.append(badge);
+        }
       }
       const kicker=tile.querySelector('.featured-native-kicker');
       if(kicker)kicker.setAttribute('aria-hidden','true');
