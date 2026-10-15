@@ -18,7 +18,7 @@ await page.locator('#hostSort').selectOption('alpha');
 assert.equal(await page.locator('#jointSortExplanation').isHidden(),true,'Method explanation hides outside joint sort');
 await page.locator('#hostSort').selectOption({index:0});await page.locator('#gardenAllPlantsDetails').evaluate(el=>el.open=false);
 await page.locator('#featuredNativeGrid .featured-native-card').filter({hasText:'Helianthus'}).first().click();
-await page.locator('#hostPlantSpotlight .garden-insect-teaser').waitFor();
+await page.locator('#hostPlantSpotlight .garden-insect-teaser').waitFor();assert.equal(await page.locator('#hostPlantSpotlight .garden-try-another').count(),1,'Visitors can jump to another plant from its story');
 assert.equal(await page.locator('#view-species').evaluate(el=>el.classList.contains('active')),false,'Opening a plant stays in the friendly story view');
 await page.locator('#hostPlantSpotlight .garden-insect-chip').first().click();
 await page.locator('#modalBackdrop.open').waitFor();
