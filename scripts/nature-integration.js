@@ -327,7 +327,7 @@ function initCuriosityFirst(){
   welcome.after(featurePanel);
   featurePanel.classList.add('garden-first-featured');
   const head=featurePanel.querySelector('h2');
-  if(head)head.textContent='A few plants to get curious about';
+  if(head)head.textContent='Pick a plant that catches your eye';
   const headDescription=featurePanel.querySelector('.collection-head p');
   if(headDescription)headDescription.textContent='Choose a little picture and follow its story.';
   // Offer more varied entry points without changing or reclassifying any source
