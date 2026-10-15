@@ -274,6 +274,8 @@ function initCuriosityFirst(){
   if(!hero||!view||!form||!resultPanel||!featurePanel||!spotlight||
      document.getElementById('gardenWelcome'))return;
   document.body.classList.add('curiosity-first');
+  // Keep the plant search itself; remove only the separate photo-ID prompt.
+  form.querySelector('.plant-id-assist')?.remove();
 
   // Begin with one sentence and a clear invitation instead of a wall of copy.
   const header=hero.querySelector('h1'),intro=hero.querySelector(':scope > p');
