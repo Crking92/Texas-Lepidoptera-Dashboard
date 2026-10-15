@@ -262,6 +262,56 @@ function initCombinedSortAndBeeCredit(){
 
 /* Curiosity-first landing experience. All source records, methods, filtering,
    garden tools, and downloads remain available inside progressive layers. */
+function initGardenNavigation(){
+  const tabs=document.querySelector('.tabs');
+  const nav=document.querySelector('.top-navigation')||tabs?.parentElement;
+  if(!tabs||!nav||document.getElementById('gardenMoreTools'))return;
+  document.body.classList.add('garden-compact-navigation');
+  const advanced=[
+    ['species','Butterflies & moths'],
+    ['bees','Specialist bees'],
+    ['compare','Compare plants'],
+    ['resources','Other food sources'],
+    ['guide','Science & credits']
+  ];
+  const menu=document.createElement('details');menu.id='gardenMoreTools';
+  menu.className='garden-more-menu';
+  const summary=document.createElement('summary');summary.textContent='More tools';
+  const options=document.createElement('div');options.className='garden-more-options';
+  menu.append(summary,options);
+  for(const [key,label] of advanced){
+    const tab=document.getElementById('tab-'+key);
+    if(!tab)continue;
+    const button=document.createElement('button');button.type='button';
+    button.textContent=label;button.dataset.openTab=key;
+    button.addEventListener('click',()=>{menu.open=false;switchTab(key)});
+    options.append(button);
+  }
+  if(!options.children.length)return;
+  tabs.after(menu);
+  function sync(){
+    const current=tabs.querySelector('.tab.active')?.dataset.tab;
+    const entry=advanced.find(([key])=>key===current);
+    summary.textContent=entry?'More tools · '+entry[1]:'More tools';
+    menu.classList.toggle('is-active',Boolean(entry));
+    menu.setAttribute('aria-label',entry?'More tools, currently viewing '+entry[1]:'More tools');
+  }
+  new MutationObserver(sync).observe(tabs,{subtree:true,attributes:true,attributeFilter:['class']});
+  sync();
+  // Original keyboard tab behavior cycles through all tabs, including those
+  // now accessible from the More menu. Capture only the visible primary tabs.
+  tabs.addEventListener('keydown',event=>{
+    if(!['ArrowRight','ArrowLeft','Home','End'].includes(event.key))return;
+    const visible=[...tabs.querySelectorAll('.tab')].filter(tab=>
+      ['hosts','garden','local'].includes(tab.dataset.tab));
+    const current=visible.indexOf(document.activeElement);
+    if(current<0)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const index=event.key==='Home'?0:event.key==='End'?visible.length-1:
+      event.key==='ArrowRight'?(current+1)%visible.length:(current-1+visible.length)%visible.length;
+    visible[index].focus();switchTab(visible[index].dataset.tab);
+  },true);
+}
 function initCuriosityFirst(){
   const hero=document.querySelector('header.hero');
   const view=document.getElementById('view-hosts');
@@ -274,6 +324,7 @@ function initCuriosityFirst(){
   if(!hero||!view||!form||!resultPanel||!featurePanel||!spotlight||
      document.getElementById('gardenWelcome'))return;
   document.body.classList.add('curiosity-first');
+  initGardenNavigation();
   // Keep the plant search itself; remove only the separate photo-ID prompt.
   form.querySelector('.plant-id-assist')?.remove();
 
