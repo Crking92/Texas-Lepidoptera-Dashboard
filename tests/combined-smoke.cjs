@@ -49,7 +49,7 @@ assert.equal(await page.locator('#hostPlantSpotlight .garden-story-primary-actio
 await page.locator('#countyQuickSelect').selectOption('Hays');
 await page.locator('#hostPlantSpotlight .garden-story-stats.has-county .garden-story-county strong').waitFor();
 assert.equal(await page.locator('#hostPlantSpotlight .garden-story-stats>div').count(),3,'Selected county adds its own distinct observational count');
-await page.waitForFunction(()=>/^\\d+$/.test(document.querySelector('#hostPlantSpotlight .garden-story-county strong')?.textContent||''),null,{timeout:6000});
+await page.waitForFunction(()=>/^\d+$/.test(document.querySelector('#hostPlantSpotlight .garden-story-county strong')?.textContent||''),null,{timeout:6000});
 assert.match(await page.locator('#hostPlantSpotlight .garden-story-county span').innerText(),/Hays Co. seen/);
 await page.locator('#countyQuickSelect').selectOption('');
 assert.equal(await page.locator('#hostPlantSpotlight .garden-story-stats>div').count(),2,'County count vanishes when All Texas is restored');assert.equal(await page.locator('#hostPlantSpotlight .garden-try-another').count(),1,'Visitors can jump to another plant from its story');
