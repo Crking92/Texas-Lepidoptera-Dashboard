@@ -298,40 +298,23 @@ function initCuriosityFirst(){
     hero.append(details);
   }
 
-  const welcome=document.createElement('section');
-  welcome.id='gardenWelcome';
-  welcome.className='garden-welcome';
-  const kicker=document.createElement('div');kicker.className='garden-welcome-eyebrow';kicker.textContent='Start wherever you like';
-  const title=document.createElement('h2');title.textContent='Whose world should we visit?';
-  const text=document.createElement('p');text.textContent='Tap a familiar plant or discover something new.';
-  const suggestions=document.createElement('div');suggestions.className='garden-discovery-actions';
-  function choice(label,genus,emoji){
-    const button=document.createElement('button');button.type='button';
-    button.className='garden-discovery-chip';button.textContent=emoji+' '+label;
-    button.addEventListener('click',()=>focusHost(genus));
-    suggestions.append(button);
-  }
-  choice('Sunflowers','Helianthus','🌻');
-  choice('Goldenrods','Solidago','✨');
-  choice('Oaks','Quercus','🌳');
-  choice('Milkweeds','Asclepias','🦋');
-  const surprise=document.createElement('button');
-  surprise.type='button';surprise.className='garden-discovery-chip garden-surprise-chip';
-  surprise.textContent='🎲 Surprise me';
-  surprise.addEventListener('click',()=>surprisePlant());
-  suggestions.append(surprise);
-  const hint=document.createElement('p');hint.className='garden-welcome-hint';
-  hint.textContent='No plant knowledge needed. Follow whatever catches your eye.';
-  welcome.append(kicker,title,text,suggestions,hint);
-  view.prepend(welcome);
-
-  // Photos and familiar plants first; the massive catalog becomes opt-in.
-  welcome.after(featurePanel);
+  // The existing page headline and search introduce the activity. Show
+  // photos immediately rather than another introductory section or four
+  // redundant buttons for the same plants pictured below.
+  view.prepend(featurePanel);
   featurePanel.classList.add('garden-first-featured');
   const head=featurePanel.querySelector('h2');
-  if(head)head.textContent='Pick a plant that catches your eye';
+  if(head)head.textContent='Pick a plant';
   const headDescription=featurePanel.querySelector('.collection-head p');
-  if(headDescription)headDescription.textContent='Choose a little picture and follow its story.';
+  if(headDescription)headDescription.textContent='Tap a photo to see its wildlife connections.';
+  const galleryHeading=featurePanel.querySelector('.collection-head');
+  if(galleryHeading&&!galleryHeading.querySelector('.garden-surprise-chip')){
+    const surprise=document.createElement('button');
+    surprise.type='button';surprise.className='garden-discovery-chip garden-surprise-chip';
+    surprise.textContent='🎲 Surprise me';
+    surprise.addEventListener('click',()=>surprisePlant());
+    galleryHeading.append(surprise);
+  }
   // Offer more varied entry points without changing or reclassifying any source
   // records. A tile represents a genus, never every species in that genus.
   const bonusPlants=[
