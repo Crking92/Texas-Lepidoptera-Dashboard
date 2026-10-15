@@ -6,7 +6,7 @@ assert.equal(await page.locator('#gardenAllPlantsDetails').evaluate(el=>el.open)
 assert(await page.locator('#featuredNativeGrid .featured-native-card').first().isVisible(),'Photo-led featured plants appear without opening data');
 await page.locator('#gardenAllPlantsDetails').evaluate(el=>el.open=true);
 await page.locator('#hostGrid .host-card').first().waitFor();
-assert.equal(await page.locator('#hostGrid .host-card').first().locator('.host-name').innerText(),'Quercus','Expected top Lepidoptera genus is oak');
+assert.equal(await page.locator('#hostGrid .host-card').first().locator('.garden-toggle').getAttribute('data-genus'),'Quercus','Expected top Lepidoptera genus is oak');
 assert.equal(await page.locator('#hostGrid .host-card').first().locator('.host-bee-metric strong').innerText(),'—','Missing specialist bee data must not display 0');
 assert.match(await page.locator('#hostGrid .host-card').first().locator('.host-bee-metric').innerText(),/Specialist bees: not listed/);
 assert.match(await page.locator('#beeSourceMainCredit').innerText(),/not that a plant has no bees/);
