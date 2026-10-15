@@ -251,3 +251,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
 }
 @media(max-width:380px){.garden-insect-chips{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.garden-discovery-chip{transition:none}.garden-first-featured .featured-native-grid{scroll-behavior:auto}}
+
+.garden-story-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.garden-try-another{background:var(--sunwash);border-color:var(--line)}
+@media(max-width:520px){.garden-story-actions .button{flex:1 1 100%;text-align:center}}
