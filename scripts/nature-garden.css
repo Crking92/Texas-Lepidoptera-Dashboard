@@ -255,3 +255,20 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
 .garden-story-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
 .garden-try-another{background:var(--sunwash);border-color:var(--line)}
 @media(max-width:520px){.garden-story-actions .button{flex:1 1 100%;text-align:center}}
+
+/* No specialist-bee source entry is missing information, never an ecological zero. */
+#hostGrid .host-bee-metric.bee-pollen-unlisted strong,
+.bee-pollen-unlisted .bee-missing-symbol{
+  color:var(--muted);
+  font-weight:500;
+}
+#hostGrid .host-bee-metric.bee-pollen-unlisted .bee-pollen-label{
+  color:var(--muted);
+  overflow-wrap:anywhere;
+}
+.bee-pollen-unlisted .bee-missing-symbol{
+  display:block;
+  font-size:1.25rem;
+  line-height:1.25;
+  margin-bottom:4px;
+}
