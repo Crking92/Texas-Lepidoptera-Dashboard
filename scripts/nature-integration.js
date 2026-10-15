@@ -423,7 +423,13 @@ function initCuriosityFirst(){
     all.className='button small garden-more-insects';
     all.textContent='See all linked butterflies and moths →';
     all.addEventListener('click',()=>exploreHost(genus));
-    teaser.append(h,expl,chips,all);
+    const again=document.createElement('button');again.type='button';
+    again.className='button small garden-try-another';
+    again.textContent='Surprise me with another plant ↻';
+    again.addEventListener('click',()=>surprisePlant());
+    const nextActions=document.createElement('div');nextActions.className='garden-story-actions';
+    nextActions.append(all,again);
+    teaser.append(h,expl,chips,nextActions);
     const note=spotlight.querySelector('.spotlight-note');
     if(note)note.before(teaser);else spotlight.append(teaser);
   }
