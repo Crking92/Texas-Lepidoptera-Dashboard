@@ -255,10 +255,196 @@ function initCombinedSortAndBeeCredit(){
   results.prepend(note);
   results.prepend(source);
 }
+
+/* Curiosity-first landing experience. All source records, methods, filtering,
+   garden tools, and downloads remain available inside progressive layers. */
+function initCuriosityFirst(){
+  const hero=document.querySelector('header.hero');
+  const view=document.getElementById('view-hosts');
+  const form=document.getElementById('heroHostSearchForm');
+  const search=document.getElementById('hostSearch');
+  const resultPanel=document.getElementById('hostResultsPanel');
+  const featurePanel=view?.querySelector('.featured-native-panel');
+  const featuredGrid=document.getElementById('featuredNativeGrid');
+  const spotlight=document.getElementById('hostPlantSpotlight');
+  if(!hero||!view||!form||!resultPanel||!featurePanel||!spotlight||
+     document.getElementById('gardenWelcome'))return;
+  document.body.classList.add('curiosity-first');
+
+  // Begin with one sentence and a clear invitation instead of a wall of copy.
+  const header=hero.querySelector('h1'),intro=hero.querySelector(':scope > p');
+  if(header)header.textContent='Every plant has a story.';
+  if(intro)intro.textContent='Pick a plant. Meet the tiny lives connected to it.';
+  const eyebrow=hero.querySelector(':scope > .eyebrow');
+  if(eyebrow)eyebrow.textContent='A little Texas nature adventure';
+  const heroFormLabel=form.querySelector('label');
+  if(heroFormLabel&&heroFormLabel.htmlFor==='hostSearch')
+    heroFormLabel.textContent='Find a plant';
+  const county=document.getElementById('countyQuickSelect');
+  const countyNote=county?.closest('.county-discovery')?.querySelector('.microcopy');
+  if(countyNote)countyNote.textContent='Choose a county to see which linked butterflies and moths have been spotted nearby.';
+  const scope=hero.querySelector('.nature-scope');
+  if(scope){
+    const details=document.createElement('details');
+    details.className='garden-method-details';
+    const summary=document.createElement('summary');summary.textContent='How do these connections work?';
+    details.append(summary,scope);
+    hero.append(details);
+  }
+
+  const welcome=document.createElement('section');
+  welcome.id='gardenWelcome';
+  welcome.className='garden-welcome';
+  const kicker=document.createElement('div');kicker.className='garden-welcome-eyebrow';kicker.textContent='Start wherever you like';
+  const title=document.createElement('h2');title.textContent='Whose world should we visit?';
+  const text=document.createElement('p');text.textContent='Tap a familiar plant or discover something new.';
+  const suggestions=document.createElement('div');suggestions.className='garden-discovery-actions';
+  function choice(label,genus,emoji){
+    const button=document.createElement('button');button.type='button';
+    button.className='garden-discovery-chip';button.textContent=emoji+' '+label;
+    button.addEventListener('click',()=>focusHost(genus));
+    suggestions.append(button);
+  }
+  choice('Sunflowers','Helianthus','🌻');
+  choice('Goldenrods','Solidago','✨');
+  choice('Oaks','Quercus','🌳');
+  choice('Milkweeds','Asclepias','🦋');
+  const surprise=document.createElement('button');
+  surprise.type='button';surprise.className='garden-discovery-chip garden-surprise-chip';
+  surprise.textContent='🎲 Surprise me';
+  surprise.addEventListener('click',()=>surprisePlant());
+  suggestions.append(surprise);
+  const hint=document.createElement('p');hint.className='garden-welcome-hint';
+  hint.textContent='No plant knowledge needed. Follow whatever catches your eye.';
+  welcome.append(kicker,title,text,suggestions,hint);
+  view.prepend(welcome);
+
+  // Photos and familiar plants first; the massive catalog becomes opt-in.
+  welcome.after(featurePanel);
+  featurePanel.classList.add('garden-first-featured');
+  const head=featurePanel.querySelector('h2');
+  if(head)head.textContent='A few plants to get curious about';
+  const headDescription=featurePanel.querySelector('.collection-head p');
+  if(headDescription)headDescription.textContent='Choose a photo to see who depends on that plant.';
+  featurePanel.after(spotlight);
+
+  const browse=document.createElement('details');browse.id='gardenAllPlantsDetails';
+  browse.className='garden-progressive-section';
+  const browseSummary=document.createElement('summary');
+  browseSummary.append(document.createTextNode('Explore the whole plant collection '));
+  const browseCount=document.createElement('span');browseCount.className='garden-summary-count';
+  browseCount.textContent=fmt.format(hosts.length)+' plant groups';
+  browseSummary.append(browseCount);
+  browse.append(browseSummary);
+  const browseIntro=document.createElement('p');browseIntro.className='garden-progressive-explainer';
+  browseIntro.textContent='Search, sort, save, or compare plants. All of the host counts and original records are still here.';
+  browse.append(browseIntro,resultPanel);
+  const beeOnly=document.getElementById('beeOnlyPlantMatches');
+  if(beeOnly)browse.append(beeOnly);
+  spotlight.after(browse);
+
+  const science=document.createElement('details');science.id='gardenScienceDetails';
+  science.className='garden-progressive-section garden-science-section';
+  const scienceSummary=document.createElement('summary');scienceSummary.textContent='Curious about the science and sources?';
+  science.append(scienceSummary);
+  const scienceIntro=document.createElement('p');scienceIntro.className='garden-progressive-explainer';
+  scienceIntro.textContent='Explore the data snapshot, how plant relationships are counted, and why local observations are kept separate.';
+  science.append(scienceIntro);
+  const originalIntro=view.querySelector('.plant-first-intro');
+  const kpis=document.getElementById('hostKpis');
+  const context=view.querySelector('.dashboard-context');
+  if(originalIntro)science.append(originalIntro);
+  if(kpis)science.append(kpis);
+  if(context)science.append(context);
+  browse.after(science);
+
+  // Typing should reveal results in place without taking focus or scrolling.
+  search?.addEventListener('input',()=>{
+    if(search.value.trim())browse.open=true;
+  });
+  form.addEventListener('submit',()=>{
+    browse.open=true;
+    window.requestAnimationFrame(()=>{
+      resultPanel.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+    });
+  });
+  const sorter=document.getElementById('hostSort');
+  sorter?.addEventListener('change',()=>{browse.open=true});
+  const allButton=document.createElement('button');allButton.type='button';
+  allButton.className='garden-see-all';allButton.textContent='Browse every plant →';
+  allButton.addEventListener('click',()=>{
+    browse.open=true;
+    browse.scrollIntoView({block:'start',behavior:'smooth'});
+  });
+  featurePanel.append(allButton);
+
+  // The entire photo/card opens its *plant story* first, not the dense insect table.
+  // Existing save, compare and bee buttons continue to perform their own actions.
+  const grid=document.getElementById('hostGrid');
+  const cardGenus=card=>card?.querySelector('.garden-toggle[data-genus]')?.dataset.genus||
+    card?.querySelector('.host-name')?.textContent?.trim();
+  function enterStory(event){
+    const card=event.target.closest('.host-card');
+    if(!card||!grid.contains(card)||event.target.closest('button,a,input,select,summary,details'))return;
+    if(event.type==='keydown'&&(event.key!=='Enter'&&event.key!==' '))return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    const genus=cardGenus(card);
+    if(genus)focusHost(genus);
+  }
+  grid?.addEventListener('click',enterStory,true);
+  grid?.addEventListener('keydown',enterStory,true);
+
+  // A few actual insect records are a playful gateway to the full species data.
+  function fillSpotlight(){
+    if(spotlight.hidden||!spotlight.querySelector('.spotlight-head')||
+       spotlight.querySelector('.garden-insect-teaser'))return;
+    const genus=spotlight.dataset.genus;if(!genus)return;
+    const insectRecords=(hostRecordMap.get(genus)||[]).filter(r=>r.statusKey==='established'||r.statusKey==='both');
+    const ranked=insectRecords.slice().sort((a,b)=>
+      (Number(['Butterfly','Skipper'].includes(b.category))-Number(['Butterfly','Skipper'].includes(a.category)))||
+      String(friendlyCommonName(a.common)).localeCompare(String(friendlyCommonName(b.common))));
+    const teaser=document.createElement('section');teaser.className='garden-insect-teaser';
+    const h=document.createElement('h3');h.textContent='Meet a few of its insect neighbors';
+    const expl=document.createElement('p');
+    expl.textContent='These are source-listed caterpillar-host relationships, not proof of feeding at this exact spot.';
+    const chips=document.createElement('div');chips.className='garden-insect-chips';
+    ranked.slice(0,4).forEach(r=>{
+      const button=document.createElement('button');button.type='button';
+      button.className='garden-insect-chip';
+      const name=friendlyCommonName(r.common);
+      button.textContent=(['Butterfly','Skipper'].includes(r.category)?'🦋 ':'🌙 ')+(name||r.species);
+      button.title=r.species;
+      button.addEventListener('click',()=>openModal(r));
+      chips.append(button);
+    });
+    const all=document.createElement('button');all.type='button';
+    all.className='button small garden-more-insects';
+    all.textContent='See all linked butterflies and moths →';
+    all.addEventListener('click',()=>exploreHost(genus));
+    teaser.append(h,expl,chips,all);
+    const note=spotlight.querySelector('.spotlight-note');
+    if(note)note.before(teaser);else spotlight.append(teaser);
+  }
+  new MutationObserver(fillSpotlight).observe(spotlight,{childList:true});
+  fillSpotlight();
+
+  // On a saved garden, keep the complete insect list reachable but folded.
+  const gardenView=document.getElementById('view-garden');
+  const insectPanel=gardenView?.querySelector('.garden-insect-panel');
+  if(insectPanel){
+    const more=document.createElement('details');more.className='garden-progressive-section garden-garden-insects';
+    const label=document.createElement('summary');label.textContent='Meet all the insects connected to your garden';
+    more.append(label,insectPanel);
+    gardenView.append(more);
+  }
+}
 function initNatureIntegration(){
 initCombinedSortAndBeeCredit();
 initCountyDiscovery();
 initBeePlantVisibility();
+initCuriosityFirst();
 const beeFrame=document.getElementById('beeExplorer');beeFrame.addEventListener('load',syncBeeTheme);
 document.getElementById('themeToggle').addEventListener('click',syncBeeTheme);
 window.addEventListener('storage',event=>{if(event.key==='txlep-garden'){gardenPlants.clear();readStoredArray('txlep-garden').forEach(g=>gardenPlants.add(g));renderGarden();renderComparison()}});
