@@ -441,3 +441,36 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
 @media(prefers-reduced-motion:reduce){
   .garden-first-featured .featured-native-card{transition:none}
 }
+
+/* A single quiet Lepidoptera number on every initial plant tile. */
+.garden-first-featured .featured-native-card::after{content:none;display:none}
+.garden-first-featured .featured-native-grid .featured-native-card .featured-lep-count{
+  position:absolute;
+  z-index:2;
+  top:7px;
+  right:7px;
+  padding:5px 8px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--panel);
+  color:var(--ink);
+  box-shadow:0 1px 8px #162e241b;
+  font-size:.75rem;
+  font-weight:780;
+  letter-spacing:0;
+  line-height:1.2;
+  white-space:nowrap;
+  pointer-events:none;
+}
+.garden-first-featured .featured-native-top>div:not(.taxon-thumb){
+  padding-bottom:10px;
+}
+@media(max-width:650px){
+ .garden-first-featured .featured-native-grid .featured-native-card .featured-lep-count{
+   top:5px;
+   right:5px;
+   font-size:.69rem;
+   padding:4px 6px;
+ }
+ .garden-first-featured .featured-native-top>div:not(.taxon-thumb){padding-bottom:9px}
+}
