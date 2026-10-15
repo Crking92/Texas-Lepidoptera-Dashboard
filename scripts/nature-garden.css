@@ -474,3 +474,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
  }
  .garden-first-featured .featured-native-top>div:not(.taxon-thumb){padding-bottom:9px}
 }
+
+/* The standalone photo-ID prompt has been removed from the opening search. */
+#heroHostSearchForm .plant-id-assist{display:none!important}
