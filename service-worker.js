@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'txlep-pwa-nature-v26-20261020';
+const CACHE_VERSION = 'txlep-pwa-nature-v27-20261020';
 const CORE_ASSETS = [
   './index.html',
   './scripts/nature-garden.css',
@@ -49,7 +49,7 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
 
   const liveCode = request.mode === 'navigate' ||
-    /\\.(?:js|css|html)$/i.test(url.pathname) ||
+    /\.(?:js|css|html)$/i.test(url.pathname) ||
     url.pathname === self.registration.scope.replace(self.location.origin, '');
 
   if (liveCode) {
