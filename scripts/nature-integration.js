@@ -974,10 +974,13 @@ function initCountyDiscovery(){
   };
   async function resolveCounty(name,signal){
     if(name==='Hays')return 326; // Verified iNaturalist place: Hays County, US, TX
-    const expected=(name+' County').toLowerCase();
+    // iNaturalist sometimes inserts spaces that county-code lists do not
+    // (e.g. Texas calls it LaSalle, while iNaturalist calls it La Salle).
+    const normalizedPlaceName=value=>String(value||'').toLowerCase().replace(/[^a-z]/g,'');
+    const expected=normalizedPlaceName(name+' County');
     const isName=p=>{
-      const raw=String(p.name||p.display_name||'').trim().toLowerCase();
-      return raw===expected||raw.startsWith(expected+',')||raw.startsWith(expected+' ');
+      const raw=String(p.name||p.display_name||'').trim().split(',')[0];
+      return normalizedPlaceName(raw)===expected;
     };
     const texas=p=>/texas|(?:^|,\s*)tx(?:$|,)/i.test([p.display_name,p.name].filter(Boolean).join(' '))||
       String(p.ancestry||'').split('/').includes('18')||
