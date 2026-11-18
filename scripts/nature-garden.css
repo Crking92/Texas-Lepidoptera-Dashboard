@@ -629,9 +629,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
   border-top:1px solid var(--line);
   border-bottom:1px solid var(--line);
 }
-#hostPlantSpotlight .garden-story-stats.has-county{
-  grid-template-columns:repeat(3,minmax(0,1fr));
-}
 #hostPlantSpotlight .garden-story-stats>div{
   min-width:0;
   padding:0 10px;
@@ -654,6 +651,17 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
   line-height:1.35;
   color:var(--muted);
   overflow-wrap:break-word;
+}
+#hostPlantSpotlight .garden-story-stats .garden-story-subline{
+  display:block;
+  margin-top:6px;
+  color:var(--muted);
+  font-size:.72rem;
+  line-height:1.4;
+  overflow-wrap:break-word;
+}
+#hostPlantSpotlight .garden-story-stats .garden-story-subline[hidden]{
+  display:none;
 }
 #hostPlantSpotlight .garden-story-primary-actions{
   display:flex;

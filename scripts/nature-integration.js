@@ -513,24 +513,39 @@ function initCuriosityFirst(){
   function syncStoryCounty(){
     const story=spotlight.querySelector('.garden-story-stats');
     if(!story)return;
-    const genus=spotlight.dataset.genus;
     const selected=document.getElementById('countyQuickSelect')?.value||'';
-    const countyMetric=story.querySelector('.garden-story-county');
-    if(!selected){countyMetric?.remove();story.classList.remove('has-county');return}
-    const local=[...document.querySelectorAll('#hostGrid .host-card')].find(card=>
-      card.querySelector('.garden-toggle[data-genus]')?.dataset.genus===genus
-    )?.querySelector('.host-county-metric strong');
-    if(!countyMetric){
-      const metric=document.createElement('div');metric.className='garden-story-county';
-      metric.append(document.createElement('strong'),document.createElement('span'));
-      story.append(metric);
+    const genus=spotlight.dataset.genus;
+    const lep=story.querySelector('.garden-story-lep .garden-story-subline');
+    const bee=story.querySelector('.garden-story-bees-count .garden-story-subline');
+    if(!selected){
+      for(const line of [lep,bee])if(line){line.textContent='';line.hidden=true}
+      return;
     }
-    const current=story.querySelector('.garden-story-county');
-    current.querySelector('strong').textContent=local?.textContent?.trim()||'…';
-    current.querySelector('span').textContent=selected+' Co. seen';
-    current.title='iNaturalist Research Grade observations of source-linked Lepidoptera in '+selected+
-      ' County, not observed caterpillar feeding on this genus';
-    story.classList.add('has-county');
+    const card=[...document.querySelectorAll('#hostGrid .host-card')].find(item=>
+      item.querySelector('.garden-toggle[data-genus]')?.dataset.genus===genus
+    );
+    const lepNumber=card?.querySelector('.host-county-metric strong')?.textContent?.trim()||'…';
+    if(lep){
+      const copy=selected+' Co. seen: '+lepNumber;
+      if(lep.textContent!==copy)lep.textContent=copy;
+      lep.hidden=false;
+      lep.title='iNaturalist Research Grade butterfly/moth sightings; not confirmed caterpillar feeding on this plant.';
+    }
+    if(bee){
+      // No Fowler genus-level association means no county comparison is possible.
+      const hasBeeSource=beePollenConnectionCount(genus)>0;
+      const localBee=card?.querySelector('.host-bee-metric .bee-county-detail')?.textContent?.trim()||'';
+      const observed=localBee.match(/^🐝\s*([\d,]+|…|—)/u)?.[1]||
+        (localBee.includes('…')?'…':'—');
+      if(hasBeeSource){
+        const copy=selected+' Co. observed: '+observed;
+        if(bee.textContent!==copy)bee.textContent=copy;
+        bee.hidden=false;
+        bee.title='Fowler-listed specialist bees also recorded in this county on iNaturalist; not confirmed pollen use of this genus.';
+      }else{
+        bee.textContent='';bee.hidden=true;
+      }
+    }
   }
   const hostGrid=document.getElementById('hostGrid');
   if(hostGrid)new MutationObserver(syncStoryCounty).observe(hostGrid,{subtree:true,childList:true,characterData:true});
@@ -575,7 +590,8 @@ function initCuriosityFirst(){
       const item=document.createElement('div');item.className=klass||'';
       const value=document.createElement('strong');value.textContent=number;
       const caption=document.createElement('span');caption.textContent=label;
-      item.title=tip;item.append(value,caption);stats.append(item);
+      const subline=document.createElement('small');subline.className='garden-story-subline';subline.hidden=true;
+      item.title=tip;item.append(value,caption,subline);stats.append(item);
     }
     metric('🦋 '+fmt.format(host?.establishedCount||0),'TX butterfly & moth links',
       'Genus-level Texas-range UDELep host associations; not every plant species hosts every taxon','garden-story-lep');
@@ -994,16 +1010,12 @@ function initCountyDiscovery(){
       const genus=card.querySelector('.collection-name')?.textContent?.trim();
       if(genus)refresh(card.querySelector('.bee-pollen-metric'),'bee-county-detail',genus);
     });
-    const spotlight=document.getElementById('hostPlantSpotlight'),story=spotlight?.querySelector('.garden-story-bees-count');
-    if(story)refresh(story,'bee-county-detail',spotlight.dataset.genus);
     document.querySelectorAll('.plant-master-row[data-genus]').forEach(row=>{
       refresh(row.querySelector('.plant-master-badges .plant-master-count:last-child'),'bee-county-detail',row.dataset.genus);
     });
   }
   function paint(){paintHostCards();paintOtherCards();paintBeeCounty()}
   document.addEventListener('plant-master-rendered',paintBeeCounty);
-  const beeStory=document.getElementById('hostPlantSpotlight');
-  if(beeStory)new MutationObserver(paintBeeCounty).observe(beeStory,{childList:true,subtree:true});
   // Core pagination, searching and My Garden replace cards. Reapply only
   // when direct card children change, not when the county label changes.
   ['hostGrid','featuredNativeGrid','gardenGrid','gardenRecommendations','compareGrid'].forEach(id=>{
