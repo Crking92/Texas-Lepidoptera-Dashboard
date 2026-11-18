@@ -78,6 +78,14 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
 .hero>.county-discovery .county-quick-summary{background:transparent;border-top:1px solid var(--line);border-radius:0;padding:9px 0 0;font-size:.77rem;color:var(--muted)}
 @media(max-width:600px){.host-count-pair{gap:9px}.host-county-metric{padding-left:9px}.host-county-metric strong{font-size:1.6rem}.host-county-metric span{font-size:.7rem}}
 
+/* Bee county evidence is a second, smaller number beneath each Texas bee count. */
+.bee-county-detail,.featured-bee-county-count{display:block;margin-top:4px;color:var(--muted);font-family:inherit;font-size:.68rem;font-weight:500;line-height:1.35;white-space:normal;overflow-wrap:break-word}
+.featured-bee-county-count{font-size:.64rem}
+.county-bee-summary{border-top:1px solid var(--line);padding-top:9px;color:var(--muted);font-size:.76rem;line-height:1.5}
+#hostGrid .host-bee-metric .bee-county-detail{color:var(--ink);font-size:.66rem}
+.garden-story-bees-count .bee-county-detail{font-size:.72rem}
+.plant-master-count .bee-county-detail{font-size:.63rem}
+
 /* Bee pollen evidence: visible on the same plant cards as caterpillar hosts. */
 .bee-pollen-metric{color:var(--ink);font-size:.83rem;line-height:1.45}
 .bee-pollen-metric strong{font-weight:750;color:var(--accent);font-size:1.07rem}
