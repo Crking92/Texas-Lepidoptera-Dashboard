@@ -339,7 +339,7 @@ function initCuriosityFirst(){
     heroFormLabel.textContent='Find a plant';
   const county=document.getElementById('countyQuickSelect');
   const countyNote=county?.closest('.county-discovery')?.querySelector('.microcopy');
-  if(countyNote)countyNote.textContent='Choose a county to see which linked butterflies and moths have been spotted nearby.';
+  if(countyNote)countyNote.textContent='Choose a county to compare local butterfly, moth, and specialist-bee sightings with the broader Texas relationships.';
   const scope=hero.querySelector('.nature-scope');
   if(scope){
     const details=document.createElement('details');
@@ -799,6 +799,7 @@ function initPlantMasterList(){
       });
       list.append(row);
     }
+    document.dispatchEvent(new Event('plant-master-rendered'));
     meta.textContent=matching.length
       ?'Showing '+fmt.format(slice.length)+' of '+fmt.format(matching.length)+' plant groups'
       : 'No matching plant groups';
@@ -878,16 +879,20 @@ function initCountyDiscovery(){
     names.forEach(name=>{const option=document.createElement('option');option.value=name;option.textContent=name+' County';group.append(option)});
     select.append(group);
   });
-  const note=document.createElement('p');note.className='microcopy';note.textContent='Compare each plant’s Texas-wide host count with the subset of linked butterfly and moth species documented in your county. County observations do not prove local caterpillar feeding.';
+  const note=document.createElement('p');note.className='microcopy';note.textContent='Compare statewide Lepidoptera hosts and specialist-bee relationships with Research Grade county sightings. These records do not prove either insect used that plant locally.';
   const output=document.createElement('div');output.id='countyQuickSummary';output.className='county-quick-summary';output.setAttribute('role','status');output.setAttribute('aria-live','polite');
-  chooser.append(label,select,note,output);hero.insertAdjacentElement('afterend',chooser);
+  const beeOutput=document.createElement('p');beeOutput.id='beeCountyQuickSummary';beeOutput.className='county-bee-summary';beeOutput.setAttribute('role','status');beeOutput.setAttribute('aria-live','polite');
+  chooser.append(label,select,note,output,beeOutput);hero.insertAdjacentElement('afterend',chooser);
 
   const api='https://api.inaturalist.org/v1/', cachePrefix='txlep-county-overlap-v3-', maxAge=30*86400000;
   let county='',revision=0,aborter=null,ready=false,matchedIds=new Set(),pending=false,failed=false;
+  let beeAborter=null,beeReady=false,beePending=false,beeMatched=new Set();
+  const beeCachePrefix='txlep-bee-county-overlap-v1-',beeSourceVersion='fowler-2026-10-07';
   const normalizedSpecies=name=>{
     const match=String(name||'').trim().match(/^([A-Z][a-z-]+)\s+([a-z][a-z-]+)/);
     return match?(match[1]+' '+match[2]).toLowerCase():null;
   };
+  const beeSourceNames=new Set(Object.values(BEE_HOST_INDEX).flat().map(bee=>normalizedSpecies(bee.name)).filter(Boolean));
   // Match research-grade county taxon names to actual UDELep rows, not to
   // the total number of moth observations or the number of plant observations.
   const nameToRecords=new Map();
@@ -961,7 +966,42 @@ function initCountyDiscovery(){
       if(genus)addMetric(card.querySelector('.compare-metrics')||card,'county-compare-metric',county+' Co. observed',value(genus));
     });
   }
-  function paint(){paintHostCards();paintOtherCards()}
+  function paintBeeCounty(){
+    const number=genus=>{
+      if(!beePollenConnectionCount(genus))return '—'; // Fowler has no genus-level bee records.
+      if(!beeReady)return beePending?'…':'—';
+      const matched=new Set((BEE_HOST_INDEX[genus]||[]).map(b=>normalizedSpecies(b.name)).filter(name=>beeMatched.has(name)));
+      return fmt.format(matched.size);
+    };
+    const refresh=(container,klass,genus)=>{
+      if(!container)return;
+      let detail=container.querySelector(':scope > .'+klass);
+      if(!county||!beePollenConnectionCount(genus)){detail?.remove();return}
+      if(!detail){detail=document.createElement('small');detail.className=klass;container.append(detail)}
+      const copy='🐝 '+number(genus)+' '+county+' Co. observed';
+      if(detail.textContent!==copy)detail.textContent=copy;
+      detail.title='Fowler-listed specialist bees also identified in Research Grade iNaturalist observations from '+county+' County. Not proof of pollen collection, or that the bee used this plant locally.';
+    };
+    document.querySelectorAll('#hostGrid .host-card').forEach(card=>{
+      const genus=card.querySelector('.garden-toggle[data-genus]')?.dataset.genus||card.querySelector('.host-name')?.textContent?.trim();
+      if(genus)refresh(card.querySelector('.host-bee-metric'),'bee-county-detail',genus);
+    });
+    document.querySelectorAll('.featured-native-card').forEach(card=>{
+      const genus=card.querySelector('.featured-native-name')?.textContent?.trim();
+      if(genus)refresh(card.querySelector('.featured-bee-count'),'featured-bee-county-count',genus);
+    });
+    document.querySelectorAll('.collection-card,.compare-card').forEach(card=>{
+      const genus=card.querySelector('.collection-name')?.textContent?.trim();
+      if(genus)refresh(card.querySelector('.bee-pollen-metric'),'bee-county-detail',genus);
+    });
+    const spotlight=document.getElementById('hostPlantSpotlight'),story=spotlight?.querySelector('.garden-story-bees-count');
+    if(story)refresh(story,'bee-county-detail',spotlight.dataset.genus);
+    document.querySelectorAll('.plant-master-row[data-genus]').forEach(row=>{
+      refresh(row.querySelector('.plant-master-badges .plant-master-count:last-child'),'bee-county-detail',row.dataset.genus);
+    });
+  }
+  function paint(){paintHostCards();paintOtherCards();paintBeeCounty()}
+  document.addEventListener('plant-master-rendered',paintBeeCounty);
   // Core pagination, searching and My Garden replace cards. Reapply only
   // when direct card children change, not when the county label changes.
   ['hostGrid','featuredNativeGrid','gardenGrid','gardenRecommendations','compareGrid'].forEach(id=>{
@@ -1054,14 +1094,63 @@ function initCountyDiscovery(){
       output.textContent='County counts could not be loaded completely ('+error.message+'). Texas host numbers remain valid. Try selecting the county again.';
     }
   }
+  function cachedBee(name){
+    try{
+      const saved=JSON.parse(localStorage.getItem(beeCachePrefix+name)||'null');
+      return saved&&saved.source===beeSourceVersion&&Date.now()-saved.saved<maxAge&&Array.isArray(saved.names)&&Number.isFinite(saved.total)?saved:null;
+    }catch(_){return null}
+  }
+  function beeStatus(saved,fromCache){
+    beeOutput.textContent='🐝 '+saved.total+' Research Grade bee taxa checked in '+county+' County · '+saved.names.length+' matched Fowler-listed specialist bee names'+(fromCache?' (cached)':'')+'. These are species sightings, not confirmed local pollen-host interactions.';
+  }
+  async function loadBeeCounty(name,token){
+    const saved=cachedBee(name);
+    if(saved){
+      beeMatched=new Set(saved.names);beeReady=true;beePending=false;paint();
+      beeStatus(saved,true);return;
+    }
+    beeAborter=new AbortController();
+    try{
+      const signal=beeAborter.signal,place=await resolveCounty(name,signal);
+      if(token!==revision)return;
+      const found=new Set(),perPage=200,maxPages=25;
+      for(let page=1;page<=maxPages;page++){
+        const params=new URLSearchParams({place_id:String(place),taxon_id:'630955',quality_grade:'research',per_page:String(perPage),page:String(page)});
+        const data=await apiGet('observations/species_counts?'+params,signal);
+        if(token!==revision)return;
+        const total=Number(data.total_results);
+        if(!Number.isFinite(total)||total<0||!Array.isArray(data.results))throw Error('Incomplete bee species response');
+        for(const row of data.results){
+          const normalized=normalizedSpecies(row.taxon?.name);
+          if(normalized&&beeSourceNames.has(normalized))found.add(normalized);
+        }
+        beeOutput.textContent='🐝 Checking '+name+' County bee records… page '+page;
+        if(page*perPage>=total){
+          beeMatched=found;beeReady=true;beePending=false;
+          const stored={source:beeSourceVersion,saved:Date.now(),names:[...found],total};
+          try{localStorage.setItem(beeCachePrefix+name,JSON.stringify(stored))}catch(_){}
+          paint();beeStatus(stored,false);return;
+        }
+        if(page===maxPages)throw Error('Bee species list exceeded complete scan limit');
+        await new Promise(resolve=>setTimeout(resolve,250));
+      }
+    }catch(error){
+      if(token!==revision||error.name==='AbortError')return;
+      beeReady=false;beePending=false;beeMatched=new Set();paint();
+      beeOutput.textContent='🐝 County bee sightings unavailable ('+error.message+'). Texas Fowler relationships remain valid; retry by selecting the county again.';
+    }
+  }
   select.addEventListener('change',()=>{
-    county=select.value;revision++;aborter?.abort();aborter=null;
+    county=select.value;revision++;aborter?.abort();aborter=null;beeAborter?.abort();beeAborter=null;
     matchedIds=new Set();ready=false;pending=!!county;failed=false;
+    beeMatched=new Set();beeReady=false;beePending=!!county;
     try{localStorage.setItem('txlep-quick-county',county)}catch(_){}
     paint();
-    if(!county){output.textContent='Showing all of Texas. Select a county to compare local observation evidence. The map and polygon tools are under Check My Area.';return}
+    if(!county){output.textContent='Showing all of Texas. Select a county to compare local observation evidence. The map and polygon tools are under Check My Area.';beeOutput.textContent='';return}
     output.textContent='Loading '+county+' County butterfly and moth records…';
+    beeOutput.textContent='🐝 Loading '+county+' County bee sightings…';
     loadCounty(county,revision);
+    loadBeeCounty(county,revision);
   });
   try{const previous=localStorage.getItem('txlep-quick-county');if(counties.includes(previous))select.value=previous}catch(_){}
   if(select.value)select.dispatchEvent(new Event('change'));else{output.textContent='Showing all of Texas. County selection updates plant counts here; it does not open a map.';paint()}
