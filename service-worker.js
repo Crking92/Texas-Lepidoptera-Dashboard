@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'txlep-pwa-nature-v27-20261020';
+const CACHE_VERSION = 'txlep-pwa-nature-v28-20261118';
 const CORE_ASSETS = [
   './index.html',
   './scripts/nature-garden.css',

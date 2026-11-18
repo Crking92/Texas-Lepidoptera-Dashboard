@@ -12,6 +12,12 @@ The app resolves the county iNaturalist place; Hays County uses existing place I
 
 **Limitations:** iNaturalist has observer and identification bias. Rare, obscure, difficult-to-identify, or under-recorded moths may be absent from the Research Grade subset. Synonyms may not always resolve. An observed insect has not necessarily fed on any particular host in that county, and a genus may contain both native and introduced plant species. The Texas count remains a host-database relationship total, not a prediction of insect abundance or local ecological benefit.
 
+## County specialist-bee observation overlay
+
+The same **Explore by county** selection also displays a **county-observed bee subset** beneath the original Texas-listed Fowler pollen-specialist bee total for each plant genus. The Texas source relationships are unchanged. iNaturalist Research Grade bee species counts are fetched for the selected county using Anthophila (iNaturalist taxon ID 630955), and scientific binomials are intersected with the species names in the unqualified genus-level Fowler index. Each bee species is counted once per plant genus. Source names that do not match iNaturalist's current taxonomy are not silently inferred as sightings.
+
+County bee results are a **separate occurrence-evidence layer, not county pollen specialization records**. They do not demonstrate that a specific bee collected pollen on any linked genus in that county, that every species of that genus supports it, or that unobserved bees are absent. A genuine zero means no source-listed bees matched the retrieved Research Grade county species list; missing source genus data remains a dash, and failed/incomplete scans display an unavailable marker instead of zero. Bee and Lepidoptera lookups and caches are separate; failure of one does not change the other. County results are cached locally for up to 30 days and require internet to refresh.
+
 ## Regression check
 
 `node tests/combined-smoke.cjs` covers selection of Hays County, side-by-side counts, preservation of the Texas total, resetting to statewide mode, and ensuring the map view is not opened by county selection. This test requires Playwright and Chromium; the existence of the test file is not proof it has run successfully.
