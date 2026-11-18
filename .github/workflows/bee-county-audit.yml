@@ -1,0 +1,19 @@
+name: Hays County specialist bee evidence audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/bee-county-audit.cjs'
+      - '.github/workflows/bee-county-audit.yml'
+jobs:
+  bee-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Independently verify Hays Research Grade sunflower bee matches
+        run: node tests/bee-county-audit.cjs
