@@ -484,6 +484,21 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
 .garden-first-featured .featured-native-grid .featured-native-card .featured-wildlife-counts>.bee-data-unlisted{
   color:var(--muted);
 }
+/* Parallel statewide and county figures inside each of the two badges. */
+.garden-first-featured .featured-native-grid .featured-native-card .featured-wildlife-counts>span{
+  border-radius:14px;
+  text-align:right;
+}
+.garden-first-featured .featured-native-grid .featured-native-card .featured-wildlife-counts>span .featured-county-subline{
+  display:block;
+  margin-top:3px;
+  font-size:.60rem;
+  font-weight:500;
+  line-height:1.25;
+  color:var(--muted);
+  white-space:nowrap;
+}
+
 .garden-first-featured .featured-native-top>div:not(.taxon-thumb){
   padding-bottom:10px;
 }
@@ -499,6 +514,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
    padding:4px 6px;
  }
  .garden-first-featured .featured-native-top>div:not(.taxon-thumb){padding-bottom:9px}
+ .garden-first-featured .featured-native-grid .featured-native-card .featured-wildlife-counts>span .featured-county-subline{font-size:.54rem}
 }
 
 /* The standalone photo-ID prompt has been removed from the opening search. */
