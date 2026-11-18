@@ -967,11 +967,29 @@ function initCountyDiscovery(){
       local.title='UDELep-linked butterflies and moths with Research Grade iNaturalist records in '+county+' County; this does not verify caterpillar feeding there.';
     });
   }
+  // Keep both photo badges parallel: statewide relationship total above a
+  // county observation line. Both use the same format, including unavailable.
+  function featuredCountyLine(badge,klass,number,description){
+    if(!badge)return;
+    let line=badge.querySelector(':scope > .'+klass);
+    if(!county){line?.remove();return}
+    if(!line){
+      line=document.createElement('small');
+      line.className='featured-county-subline '+klass;
+      badge.append(line);
+    }
+    const label=county+' Co. seen: '+number;
+    if(line.textContent!==label)line.textContent=label;
+    line.title=description;
+  }
   function paintOtherCards(){
     const value=genus=>ready?fmt.format(countFor(genus)):pending?'…':'—';
     document.querySelectorAll('.featured-native-card').forEach(card=>{
       const genus=card.querySelector('.featured-native-name')?.textContent?.trim();
-      if(genus)addMetric(card.querySelector('.featured-native-stats'),'featured-stat',county+' Co. observed',value(genus));
+      if(!genus)return;
+      addMetric(card.querySelector('.featured-native-stats'),'featured-stat',county+' Co. observed',value(genus));
+      featuredCountyLine(card.querySelector('.featured-lep-count'),'featured-lep-county-count',value(genus),
+        'Research Grade iNaturalist sightings of UDELep-linked butterflies and moths in '+county+' County; not confirmed plant feeding.');
     });
     document.querySelectorAll('.collection-card').forEach(card=>{
       const genus=card.querySelector('.collection-name')?.textContent?.trim();
@@ -1004,7 +1022,9 @@ function initCountyDiscovery(){
     });
     document.querySelectorAll('.featured-native-card').forEach(card=>{
       const genus=card.querySelector('.featured-native-name')?.textContent?.trim();
-      if(genus)refresh(card.querySelector('.featured-bee-count'),'featured-bee-county-count',genus);
+      if(!genus)return;
+      featuredCountyLine(card.querySelector('.featured-bee-count'),'featured-bee-county-count',number(genus),
+        'Fowler-listed specialist bees also documented in '+county+' County on iNaturalist. This is not proof they collected pollen from this plant genus locally. A dash means source data are unlisted or unavailable.');
     });
     document.querySelectorAll('.collection-card,.compare-card').forEach(card=>{
       const genus=card.querySelector('.collection-name')?.textContent?.trim();
