@@ -1034,7 +1034,22 @@ function initCountyDiscovery(){
       refresh(row.querySelector('.plant-master-badges .plant-master-count:last-child'),'bee-county-detail',row.dataset.genus);
     });
   }
-  function paint(){paintHostCards();paintOtherCards();paintBeeCounty()}
+  function announceFeaturedCounty(){
+    document.querySelectorAll('#featuredNativeGrid .featured-native-card').forEach(tile=>{
+      // The overlaid badge stack is aria-hidden; keep both county numbers in
+      // the tile's spoken label rather than hiding local evidence from readers.
+      if(!county){
+        if(tile.dataset.statewideAriaLabel)tile.setAttribute('aria-label',tile.dataset.statewideAriaLabel);
+        return;
+      }
+      if(!tile.dataset.statewideAriaLabel)tile.dataset.statewideAriaLabel=tile.getAttribute('aria-label')||'Explore this plant';
+      const lep=tile.querySelector('.featured-lep-county-count')?.textContent;
+      const bee=tile.querySelector('.featured-bee-county-count')?.textContent;
+      const extras=[lep?'butterflies and moths '+lep:null,bee?'specialist bees '+bee:null].filter(Boolean);
+      tile.setAttribute('aria-label',tile.dataset.statewideAriaLabel+(extras.length?', '+extras.join(', '):''));
+    });
+  }
+  function paint(){paintHostCards();paintOtherCards();paintBeeCounty();announceFeaturedCounty()}
   document.addEventListener('plant-master-rendered',paintBeeCounty);
   // Core pagination, searching and My Garden replace cards. Reapply only
   // when direct card children change, not when the county label changes.
