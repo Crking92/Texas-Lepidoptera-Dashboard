@@ -1002,6 +1002,8 @@ function initCountyDiscovery(){
   }
   function paint(){paintHostCards();paintOtherCards();paintBeeCounty()}
   document.addEventListener('plant-master-rendered',paintBeeCounty);
+  const beeStory=document.getElementById('hostPlantSpotlight');
+  if(beeStory)new MutationObserver(paintBeeCounty).observe(beeStory,{childList:true,subtree:true});
   // Core pagination, searching and My Garden replace cards. Reapply only
   // when direct card children change, not when the county label changes.
   ['hostGrid','featuredNativeGrid','gardenGrid','gardenRecommendations','compareGrid'].forEach(id=>{
