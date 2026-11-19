@@ -1110,3 +1110,133 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px soli
 @media(prefers-reduced-motion:reduce){
   .plant-master-row{transition:none}
 }
+
+/* Search result: three visually equal measures, three distinct meanings.
+   UDELep Texas host links, county species occurrence and Fowler specialists
+   are never added to one another or treated as confirmed local feeding. */
+#hostGrid .host-card .host-count-pair{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  width:100%;
+  margin-top:14px;
+  align-items:stretch;
+}
+#hostGrid .host-card .host-count-pair.has-county{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+#hostGrid .host-card .host-count-pair>div{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  min-width:0;
+  padding:10px 9px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--soft);
+  margin:0;
+}
+#hostGrid .host-card .host-count-pair>div+div{
+  border-left:1px solid var(--line);
+}
+#hostGrid .host-card .host-count-pair>div:last-child{padding-right:9px}
+#hostGrid .host-card .host-count-pair .host-count,
+#hostGrid .host-card .host-count-pair .host-county-metric strong,
+#hostGrid .host-card .host-count-pair .host-bee-metric strong{
+  display:block;
+  width:100%;
+  flex:0 0 auto;
+  font-size:clamp(1.22rem,2vw,1.56rem);
+  line-height:1.15;
+  letter-spacing:-.025em;
+  margin:0 0 5px;
+  font-family:Georgia,serif;
+  font-weight:500;
+  color:var(--accent);
+  white-space:nowrap;
+}
+#hostGrid .host-card .host-count-pair .host-count::before,
+#hostGrid .host-card .host-count-pair .host-county-metric strong::before,
+#hostGrid .host-card .host-count-pair .host-bee-metric strong::before{
+  display:inline;
+  font-family:system-ui,sans-serif;
+  font-size:.69em;
+  font-weight:normal;
+  margin-right:4px;
+  vertical-align:baseline;
+}
+#hostGrid .host-card .host-count-pair .host-count::before{content:"🦋 "}
+#hostGrid .host-card .host-count-pair .host-county-metric strong::before{content:"📍 "}
+#hostGrid .host-card .host-count-pair .host-bee-metric strong::before{content:"🐝 "}
+#hostGrid .host-card .host-count-pair .microcopy,
+#hostGrid .host-card .host-count-pair .host-county-metric>span,
+#hostGrid .host-card .host-count-pair .host-bee-metric>.bee-pollen-label{
+  display:block;
+  margin:0;
+  padding:0;
+  font-size:.72rem;
+  line-height:1.32;
+  font-weight:500;
+  color:var(--muted);
+  overflow-wrap:normal;
+  word-break:normal;
+  hyphens:none;
+}
+#hostGrid .host-card .host-count-pair .bee-county-detail{
+  display:block;
+  margin-top:6px;
+  padding-top:5px;
+  border-top:1px solid var(--line);
+  font-size:.66rem;
+  line-height:1.35;
+  color:var(--muted);
+}
+#hostGrid .host-card .host-count-pair .bee-pollen-unlisted{
+  background:var(--soft);
+  color:var(--muted);
+}
+#hostGrid .host-card .host-count-pair .bee-pollen-unlisted strong{
+  color:var(--muted);
+}
+#hostMetricsMeaning{
+  width:100%;
+  margin:7px 0 14px;
+  font-size:.77rem;
+  color:var(--muted);
+}
+#hostMetricsMeaning summary{
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  color:var(--accent);
+  font-size:.77rem;
+  font-weight:750;
+  padding:6px 0;
+}
+#hostMetricsMeaning summary:focus-visible{
+  outline:2px solid var(--accent-2);
+  outline-offset:3px;
+}
+#hostMetricsMeaning p{
+  max-width:75ch;
+  margin:4px 0 9px;
+  line-height:1.55;
+}
+@media(max-width:600px){
+ #hostGrid .host-card .host-count-pair{gap:5px}
+ #hostGrid .host-card .host-count-pair>div{padding:9px 6px}
+ #hostGrid .host-card .host-count-pair>div:last-child{padding-right:6px}
+ #hostGrid .host-card .host-count-pair .host-count,
+ #hostGrid .host-card .host-count-pair .host-county-metric strong,
+ #hostGrid .host-card .host-count-pair .host-bee-metric strong{font-size:1.27rem}
+ #hostGrid .host-card .host-count-pair .microcopy,
+ #hostGrid .host-card .host-count-pair .host-county-metric>span,
+ #hostGrid .host-card .host-count-pair .host-bee-metric>.bee-pollen-label{font-size:.66rem}
+}
+@media(max-width:365px){
+ #hostGrid .host-card .host-count-pair>div{padding:8px 5px}
+ #hostGrid .host-card .host-count-pair .host-count,
+ #hostGrid .host-card .host-count-pair .host-county-metric strong,
+ #hostGrid .host-card .host-count-pair .host-bee-metric strong{font-size:1.15rem}
+}
