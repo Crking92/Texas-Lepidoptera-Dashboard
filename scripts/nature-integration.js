@@ -74,11 +74,11 @@ function initBeePlantVisibility(){
         row=document.createElement('div');row.className='host-count-pair';
         const statewide=document.createElement('div');statewide.className='host-texas-metric';
         original.before(row);statewide.append(original);
-        if(label){label.title=label.textContent;label.textContent='TX butterfly + moth hosts';statewide.append(label)}
+        if(label){label.title=label.textContent;label.textContent='Texas host links';label.title='Texas-range butterflies and moths linked to this plant genus in UDELep; not a count of local feeding';statewide.append(label)}
         row.append(statewide);
       }else{
         const label=row.querySelector('.host-texas-metric .microcopy');
-        if(label){label.title='Texas-range butterfly and moth taxa linked to this plant genus in UDELep';label.textContent='TX butterfly + moth hosts'}
+        if(label){label.title='Texas-range butterfly and moth taxa linked to this plant genus in UDELep';label.textContent='Texas host links'}
       }
       if(!row.querySelector('.host-bee-metric')){
         const metric=document.createElement('div'),number=document.createElement('strong'),label=document.createElement('span');
@@ -88,7 +88,7 @@ function initBeePlantVisibility(){
         if(!count)metric.classList.add('bee-pollen-unlisted');
         number.textContent=count?fmt.format(count):'—';
         label.className='bee-pollen-label';
-        label.textContent=count?'TX specialist bees':'Specialist bees: not listed';
+        label.textContent='Texas specialist bees';
         metric.setAttribute('aria-label',count?count+' Texas-listed pollen-specialist bees linked to '+genus:'Specialist bee data not listed for '+genus+' in the current source; this does not mean that no bees use this plant');
         metric.append(number,label);
         row.append(metric);
@@ -258,6 +258,15 @@ function initCombinedSortAndBeeCredit(){
   update();
   results.prepend(note);
   results.prepend(source);
+  if(!document.getElementById('hostMetricsMeaning')){
+    const meaning=document.createElement('details');
+    meaning.id='hostMetricsMeaning';meaning.className='host-metrics-meaning';
+    const summary=document.createElement('summary');summary.textContent='What do these counts mean?';
+    const explanation=document.createElement('p');
+    explanation.textContent='🦋 Texas host links are butterfly and moth taxa associated with the plant genus in UDELep. 📍 County species recorded are linked insects documented in that county on iNaturalist—not confirmed feeding on this plant. 🐝 Texas specialist bees are from the Fowler pollen-specialist source; — means no entry is listed, not zero visiting bees.';
+    meaning.append(summary,explanation);
+    source.after(meaning);
+  }
 }
 
 /* Curiosity-first landing experience. All source records, methods, filtering,
@@ -963,7 +972,7 @@ function initCountyDiscovery(){
         row.insertBefore(local,row.querySelector('.host-bee-metric'));
       }
       local.querySelector('strong').textContent=ready?fmt.format(countFor(genus)):pending?'…':'—';
-      local.querySelector('span').textContent=county+' Co. observed';
+      local.querySelector('span').textContent=county+' species recorded';
       local.title='UDELep-linked butterflies and moths with verifiable iNaturalist records (Research Grade + Needs ID) in '+county+' County; this does not verify caterpillar feeding there.';
     });
   }
@@ -1012,7 +1021,7 @@ function initCountyDiscovery(){
       let detail=container.querySelector(':scope > .'+klass);
       if(!county||!beePollenConnectionCount(genus)){detail?.remove();return}
       if(!detail){detail=document.createElement('small');detail.className=klass;container.append(detail)}
-      const copy='🐝 '+number(genus)+' '+county+' Co. observed';
+      const copy='🐝 '+number(genus)+' '+county+' bee species recorded';
       if(detail.textContent!==copy)detail.textContent=copy;
       detail.title='Fowler-listed specialist bees also identified in Research Grade + Needs ID iNaturalist observations from '+county+' County. Not proof of pollen collection, or that the bee used this plant locally.';
     };
