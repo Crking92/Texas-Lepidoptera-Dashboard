@@ -14,6 +14,17 @@ const {chromium}=require('playwright');
   console.log('BODY START:',(await page.locator('body').innerText({timeout:10000})).slice(0,7500));
   console.log('BUTTONS:',JSON.stringify((await page.locator('button').allTextContents()).slice(0,55)));
   console.log('DATA DOM:',(await page.locator('main').count()));
+  const exportTab=page.getByRole('button',{name:'Occurrence Export'});
+  console.log('OCCURRENCE EXPORT TAB COUNT:',await exportTab.count());
+  if(await exportTab.count()){
+    await exportTab.click();
+    await page.waitForTimeout(6500);
+    console.log('AFTER EXPORT TAB BODY:',(await page.locator('body').innerText()).slice(0,12000));
+    console.log('AFTER EXPORT TAB BUTTONS:',JSON.stringify((await page.getByRole('button').allTextContents()).slice(0,80)));
+    console.log('AFTER EXPORT TAB NAMED ARIA:',JSON.stringify((await page.locator('[aria-label],[title]').evaluateAll(els=>els.map(el=>({tag:el.tagName,aria:el.getAttribute('aria-label')||'',title:el.getAttribute('title')||'',text:(el.textContent||'').trim().slice(0,70)})).filter(x=>/export|download|csv|county|state|data|file|table/i.test(x.aria+' '+x.title+' '+x.text)).slice(0,75)))));
+    await page.screenshot({path:'fws-beetool-probe.png',fullPage:false,timeout:20000});
+  }
+
   await page.screenshot({path:'fws-beetool-probe.png',fullPage:false,timeout:20000});
  }catch(e){console.error('PROBE ERROR',String(e.stack||e))}
  finally{await browser.close()}
