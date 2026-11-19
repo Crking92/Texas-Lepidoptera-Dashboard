@@ -41,7 +41,7 @@ async function inatSynonyms(){
      }else if(direct.length>1)errors.push({source,reason:'ambiguous autocomplete synonym',taxa:direct.map(x=>({id:x.id,name:x.name}))});
      else misses.push(source);
    }catch(e){errors.push({source,reason:String(e.message||e)})}
-   await pause(710); // respect API usage, avoid many rapid requests
+   await pause(1100); // respect iNaturalist approx 1 API call per second
  }
  console.log('INAT SOURCE NAMES:',sunflower.length,'synonym candidates',aliases.length,'unresolved',misses.length,'errors/ambiguous',errors.length);
  console.log('INAT ALIAS CANDIDATES:',JSON.stringify(aliases));
@@ -60,32 +60,36 @@ async function gbifSpecimens(){
    const taxon=await get('https://api.gbif.org/v1/species/match?'+new URLSearchParams({name:family,rank:'FAMILY'}));
    const familyKey=taxon.usageKey;
    if(!familyKey||taxon.rank!=='FAMILY')throw Error('GBIF family match failed for '+family+': '+JSON.stringify(taxon).slice(0,300));
-   for(const county of ['Hays','Hays County']){
-     const base={country:'US',stateProvince:'Texas',county,familyKey:String(familyKey),basisOfRecord:'PRESERVED_SPECIMEN',limit:'300'};
-     let total=null,kept=0;
-     for(let page=0;page<20;page++){
-       const query=new URLSearchParams({...base,offset:String(page*300)});
-       const payload=await get('https://api.gbif.org/v1/occurrence/search?'+query);
-       if(total===null)total=payload.count||0;
-       for(const row of payload.results||[]){
-         if(!countyOK(row.county)||!texasOK(row.stateProvince)||row.countryCode!=='US')continue;
-         if(row.basisOfRecord!=='PRESERVED_SPECIMEN')continue;
-         const name=norm(row.species||row.acceptedScientificName||row.scientificName);
-         if(!name||!targets.has(name))continue;
-         specimens.push({
-           species:name,key:row.key,recordedAs:row.scientificName,
-           date:row.eventDate||null,dataset:row.datasetName||null,
-           collection:row.institutionCode||null,catalog:row.catalogNumber||null,
-           county:row.county,state:row.stateProvince,
-           country:row.countryCode,url:'https://www.gbif.org/occurrence/'+row.key
-         });
-         kept++;
-       }
-       if(payload.endOfRecords||((page+1)*300>=total))break;
-       if(page===19)throw Error('GBIF specimen search incomplete '+family+' '+county+' total '+total);
+   // GBIF /occurrence/search does not filter directly by county text.
+   // Search a generous Hays-region rectangle, then require the ORIGINAL
+   // individual voucher county/state fields to explicitly say Hays, Texas.
+   // Coordinate-less museum records are not captured by this method.
+   const geometry='POLYGON((-98.65 29.60,-97.55 29.60,-97.55 30.50,-98.65 30.50,-98.65 29.60))';
+   const base={country:'US',stateProvince:'Texas',geometry,familyKey:String(familyKey),basisOfRecord:'PRESERVED_SPECIMEN',limit:'300'};
+   let total=null,kept=0,seen=0,complete=false;
+   for(let page=0;page<35;page++){
+     const query=new URLSearchParams({...base,offset:String(page*300)});
+     const payload=await get('https://api.gbif.org/v1/occurrence/search?'+query);
+     if(total===null)total=payload.count||0;
+     for(const row of payload.results||[]){
+       seen++;
+       if(!countyOK(row.county)||!texasOK(row.stateProvince)||row.countryCode!=='US')continue;
+       if(row.basisOfRecord!=='PRESERVED_SPECIMEN')continue;
+       const name=norm(row.species||row.acceptedScientificName||row.scientificName);
+       if(!name||!targets.has(name))continue;
+       specimens.push({
+         species:name,key:row.key,recordedAs:row.scientificName,
+         date:row.eventDate||null,dataset:row.datasetName||null,
+         collection:row.institutionCode||null,catalog:row.catalogNumber||null,
+         county:row.county,state:row.stateProvince,
+         country:row.countryCode,url:'https://www.gbif.org/occurrence/'+row.key
+       });
+       kept++;
      }
-     console.log('GBIF FAMILY SEARCH:',family,'county parameter',county,'total',total,'matching target specimens',kept);
+     if(payload.endOfRecords||((page+1)*300>=total)){complete=true;break}
    }
+   console.log('GBIF GEO SEARCH:',family,'regional records',total,'rows processed',seen,'complete',complete,'explicit Hays sunflower vouchers',kept);
+   if(!complete)console.log('INCOMPLETE GBIF FAMILY: candidate list is partial, not proof of absence',family);
  }
  const unique=new Map();
  for(const record of specimens)unique.set(String(record.key),record);
@@ -104,8 +108,8 @@ async function gbifSpecimens(){
 (async()=>{
  console.log('HAYS SUNFLOWER BEE SUPPLEMENTAL EVIDENCE AUDIT');
  console.log('Baseline: 72 Fowler-listed Helianthus bees; 4 Hays Research Grade matches, 5 Hays verifiable matches');
- const specimens=await gbifSpecimens();
  const aliases=await inatSynonyms();
+ const specimens=await gbifSpecimens();
  const newAlias=aliases.filter(a=>a.haysResearch);
  console.log('AUDIT SUMMARY:',JSON.stringify({sunflowerSourceSpecies:sunflower.length,gbifSpecimenSpecies:specimens.size,specimenOnlyNewVsResearch:[...specimens.keys()].filter(n=>!knownRG.has(n)).length,inatAliasesOverlappingKnownRG:newAlias.length}));
  console.log('PROVENANCE: GBIF museum vouchers are supporting candidates, not automatically promoted into the live dashboard. Synonym candidates need taxon-concept review.');
