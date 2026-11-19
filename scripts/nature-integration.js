@@ -263,7 +263,7 @@ function initCombinedSortAndBeeCredit(){
     meaning.id='hostMetricsMeaning';meaning.className='host-metrics-meaning';
     const summary=document.createElement('summary');summary.textContent='What do these counts mean?';
     const explanation=document.createElement('p');
-    explanation.textContent='🦋 Texas host links are butterfly and moth taxa associated with the plant genus in UDELep. 📍 County species recorded are linked insects documented in that county on iNaturalist—not confirmed feeding on this plant. 🐝 Texas specialist bees are from the Fowler pollen-specialist source; — means no entry is listed, not zero visiting bees.';
+    explanation.textContent='🦋 Texas host links are butterflies and moths associated with this plant genus in UDELep. 📍 County seen counts how many of those linked insects have been observed anywhere in the selected county on iNaturalist. 🐝 Specialist-bee relationships come from Jarrod Fowler; county bee sightings independently confirm those bee species were recorded there. Neither county count requires an insect to be photographed feeding or gathering pollen on this plant. A dash means data are not listed or available, not zero visitors.';
     meaning.append(summary,explanation);
     source.after(meaning);
   }
@@ -972,8 +972,8 @@ function initCountyDiscovery(){
         row.insertBefore(local,row.querySelector('.host-bee-metric'));
       }
       local.querySelector('strong').textContent=ready?fmt.format(countFor(genus)):pending?'…':'—';
-      local.querySelector('span').textContent=county+' species recorded';
-      local.title='UDELep-linked butterflies and moths with verifiable iNaturalist records (Research Grade + Needs ID) in '+county+' County; this does not verify caterpillar feeding there.';
+      local.querySelector('span').textContent=county+' Co. seen';
+      local.title='Butterfly and moth species linked to this plant genus in UDELep and independently observed in '+county+' County on iNaturalist (Research Grade or Needs ID). A feeding photo is not required.';
     });
   }
   // Keep both photo badges parallel: statewide relationship total above a
@@ -1021,9 +1021,9 @@ function initCountyDiscovery(){
       let detail=container.querySelector(':scope > .'+klass);
       if(!county||!beePollenConnectionCount(genus)){detail?.remove();return}
       if(!detail){detail=document.createElement('small');detail.className=klass;container.append(detail)}
-      const copy='🐝 '+number(genus)+' '+county+' bee species recorded';
+      const copy='🐝 '+number(genus)+' '+county+' Co. seen';
       if(detail.textContent!==copy)detail.textContent=copy;
-      detail.title='Fowler-listed specialist bees also identified in Research Grade + Needs ID iNaturalist observations from '+county+' County. Not proof of pollen collection, or that the bee used this plant locally.';
+      detail.title='Fowler-listed specialist bee species independently observed in '+county+' County on iNaturalist (Research Grade or Needs ID). No observation on the plant is required.';
     };
     document.querySelectorAll('#hostGrid .host-card').forEach(card=>{
       const genus=card.querySelector('.garden-toggle[data-genus]')?.dataset.genus||card.querySelector('.host-name')?.textContent?.trim();
