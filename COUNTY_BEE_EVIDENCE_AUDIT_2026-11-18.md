@@ -1,5 +1,8 @@
 # Hays County specialist bee occurrence audit — November 18, 2026
 
+> **Policy update, November 19, 2026:** The live county bee and Lepidoptera overlays now include iNaturalist Research Grade **and Needs ID** observations (`verifiable=true`, excluding Casual). The 4-Research-Grade figure below is retained as the historical strict-filter baseline; the 5-verifiable observation result is the comparison reported by this audit. Museum evidence is still separate and has not been folded into the live badge. This document records the original audit, not the current filter setting.
+
+
 ## Scientific question
 
 For each bee species listed by Jarrod Fowler as associated with a plant genus, **has that same bee species been documented anywhere in Hays County, Texas?** Its activity and the plant on which it was seen are irrelevant. A sighting or labeled museum specimen is evidence of geographic occurrence, **not** confirmation of pollen collection on the source-linked plant.
