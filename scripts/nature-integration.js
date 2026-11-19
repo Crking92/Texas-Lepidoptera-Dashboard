@@ -543,9 +543,9 @@ function initCuriosityFirst(){
     if(bee){
       // No Fowler genus-level association means no county comparison is possible.
       const hasBeeSource=beePollenConnectionCount(genus)>0;
-      const localBee=card?.querySelector('.host-bee-metric .bee-county-detail')?.textContent?.trim()||'';
-      const observed=localBee.match(/^🐝\s*([\d,]+|…|—)/u)?.[1]||
-        (localBee.includes('…')?'…':'—');
+      // The source-based bee count and local bee sightings live in separate
+      // metrics. Both refer to bee SPECIES, never visits to this host plant.
+      const observed=card?.querySelector('.host-bee-county-metric strong')?.textContent?.trim()||'…';
       if(hasBeeSource){
         const copy=selected+' Co. observed: '+observed;
         if(bee.textContent!==copy)bee.textContent=copy;
@@ -965,7 +965,11 @@ function initCountyDiscovery(){
       }
       row.classList.toggle('has-county',Boolean(county));
       let local=row.querySelector('.host-county-metric');
-      if(!county){local?.remove();return}
+      if(!county){
+        local?.remove();
+        row.querySelector('.host-bee-county-metric')?.remove();
+        return;
+      }
       if(!local){
         local=document.createElement('div');local.className='host-county-metric';
         local.append(document.createElement('strong'),document.createElement('span'));
@@ -974,6 +978,9 @@ function initCountyDiscovery(){
       local.querySelector('strong').textContent=ready?fmt.format(countFor(genus)):pending?'…':'—';
       local.querySelector('span').textContent=county+' Co. seen';
       local.title='Butterfly and moth species linked to this plant genus in UDELep and independently observed in '+county+' County on iNaturalist (Research Grade or Needs ID). A feeding photo is not required.';
+      // Order always stays Lepidoptera Texas/County, then bees Texas/County.
+      const bee=row.querySelector('.host-bee-metric');
+      if(bee && row.children[2]!==bee)row.insertBefore(bee,row.querySelector('.host-bee-county-metric'));
     });
   }
   // Keep both photo badges parallel: statewide relationship total above a
@@ -1027,7 +1034,30 @@ function initCountyDiscovery(){
     };
     document.querySelectorAll('#hostGrid .host-card').forEach(card=>{
       const genus=card.querySelector('.garden-toggle[data-genus]')?.dataset.genus||card.querySelector('.host-name')?.textContent?.trim();
-      if(genus)refresh(card.querySelector('.host-bee-metric'),'bee-county-detail',genus);
+      const row=card.querySelector('.host-count-pair');
+      if(!genus||!row)return;
+      // Unlike the other views, searched plants use four symmetric cards
+      // rather than nesting county sightings under the statewide bee total.
+      row.querySelector('.host-bee-metric .bee-county-detail')?.remove();
+      let local=row.querySelector('.host-bee-county-metric');
+      if(!county){local?.remove();return}
+      if(!local){
+        local=document.createElement('div');
+        local.className='host-bee-county-metric';
+        local.append(document.createElement('strong'),document.createElement('span'));
+        row.append(local);
+      }
+      const hasSource=beePollenConnectionCount(genus)>0;
+      const value=number(genus);
+      local.classList.toggle('bee-county-unlisted',!hasSource);
+      local.querySelector('strong').textContent=value;
+      local.querySelector('span').textContent=county+' Co. seen';
+      local.title=hasSource
+        ?'Fowler-linked specialist bee species independently recorded in '+county+' County on iNaturalist. A pollen visit to this plant is not required.'
+        :'No specialist bee relationship is listed for this genus in Fowler; a county comparison is therefore unavailable.';
+      local.setAttribute('aria-label',hasSource
+        ?value+' Fowler-linked specialist bee species seen in '+county+' County; plant visitation is not required'
+        :'Specialist-bee source data not listed for '+genus+'; no county bee comparison available');
     });
     document.querySelectorAll('.featured-native-card').forEach(card=>{
       const genus=card.querySelector('.featured-native-name')?.textContent?.trim();
