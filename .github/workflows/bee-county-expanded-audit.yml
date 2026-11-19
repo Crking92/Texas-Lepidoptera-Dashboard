@@ -1,0 +1,19 @@
+name: Hays bee synonyms and museum specimen audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/bee-county-expanded-audit.cjs'
+      - '.github/workflows/bee-county-expanded-audit.yml'
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit museum vouchers and iNaturalist scientific-name aliases
+        run: node tests/bee-county-expanded-audit.cjs
